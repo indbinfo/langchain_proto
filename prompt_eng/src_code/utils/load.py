@@ -11,6 +11,9 @@ prompt_path = config['path']['prompt_path']
 result_path = config['path']['result_path']
 csv_path = config['path']['csv_path']
 main_path = os.path.join(root_path, prompt_path)
+code_path = config['path']['code_path']
+code_path = os.path.join(root_path,result_path, code_path)
+
 prompts = [str(val) for val in config['prompts']]
 pt_tasks= config['pt_tasks']
 components = config['components']
@@ -38,8 +41,8 @@ def update_components_dir():
     for dir in new_dirs:
         os.makedirs(dir, exist_ok=True)
 
-def save_components_path(prompt_no, mdl_task, component_dict):
-    base_path = os.path.join(main_path,str(prompt_no),mdl_task)
+def save_components_path(prompt_no, pt_task, component_dict):
+    base_path = os.path.join(main_path,str(prompt_no),pt_task)
     for comp, comp_files in component_dict.items():
         tmp_path = os.path.join(base_path,comp)
         end_paths = extend_path(tmp_path, comp_files)
@@ -57,8 +60,11 @@ def save_components_data(component_dict):
     return component_dict
 
 def read_component(file_path):
-    with open(file_path,'r',encoding='utf-8') as f:
-        txt = f.read()
+    try:
+        with open(file_path,'r',encoding='utf-8') as f:
+            txt = f.read()
+    except FileNotFoundError:
+        raise ValueError
     return txt
 
 
@@ -82,7 +88,7 @@ def combine_dict_values(data_dict):
             if value:
                 row[main_key] = sub_key
                 combination_values.append(value)
-        row['result'] = ' '.join(combination_values)
+        row['input'] = ' '.join(combination_values)
         if row:  # Ensure the row has data
             data.append(row)
 
@@ -95,38 +101,59 @@ def combine_dict_values(data_dict):
             df[main_key] = None
 
     # Reorder the DataFrame columns to ensure 'combination' is last
-    column_order = list(data_dict.keys()) + ['result']
+    column_order = list(data_dict.keys()) + ['input']
     df = df[column_order]
 
     return df
 
 
-def load_data(user,prompt_no, mdl_task,component_dict):
-    tmp_dict = save_components_path(prompt_no, mdl_task, component_dict)
+
+def load_data(prompt_no, pt_task,component_dict,file_nm):
+    tmp_dict = save_components_path(prompt_no, pt_task, component_dict)
     result_dict = save_components_data(tmp_dict)
-    new_df = combine_dict_values(result_dict)
-    new_df['user'] = user
-    new_df['prompt_no'] = prompt_no
-    new_df['mdl_task'] = mdl_task
+    df = combine_dict_values(result_dict)
+    task = load_task(prompt_no, pt_task,file_nm)
+    
+    return df, task
+
+
+def load_task(prompt_no, pt_task,file_nm):
+    path = os.path.join(main_path,str(prompt_no),pt_task,'task',file_nm)
+    task = read_component(path)
+
+    return task
+
+def make_py_file(df):
+    for idx, row in df.iterrows():
+        seq = row['seq']
+        code = row['output']
+        file_nm = f"{seq}.py"
+        path = os.path.join(code_path,file_nm)
+        with open(path, 'w') as file:
+            file.write(code)
+
+
+def save_data(df, user,prompt_no, pt_task):
+    df['user'] = user
+    df['prompt_no'] = prompt_no
+    df['pt_task'] = pt_task
     path = os.path.join(root_path,result_path,csv_path,user,'result.csv')
     if os.path.exists(path):
         org_df = pd.read_csv(path)
         prev_idx = len(org_df)+1
-        end_idx = prev_idx + len(new_df)
-        new_df['seq'] = range(prev_idx,end_idx)
-        new_df = pd.concat([org_df,new_df],axis=0,ignore_index=True)
+        end_idx = prev_idx + len(df)
+        seq_range = range(prev_idx,end_idx)
+        df['seq'] = seq_range
+        make_py_file(df)
+        df = pd.concat([org_df,df],axis=0,ignore_index=True)
     else:
-        end_idx = len(new_df)+1
-        new_df['seq'] = range(1,end_idx)
-    new_df.to_csv(path, index=False)
+        end_idx = len(df)+1
+        df['seq'] = range(1,end_idx)
+    df.to_csv(path, index=False)
        
-    return new_df
+    return df
 
-
-
-
-    
 
 if __name__ == "__main__":
-    # update_components_dir()
-    load_data(user='dw',prompt_no=1, mdl_task='code-gen',component_dict={'context':['1.txt','2.txt'],'exampler':['1.txt','2.txt'],'persona':['1.txt'],'task':['1.txt']})
+    update_components_dir()
+    # load_data(user='dw',prompt_no=1, mdl_task='code-gen',component_dict={'context':['1.txt','2.txt'],'exampler':['1.txt','2.txt'],'persona':['1.txt'],'task':['1.txt']})

@@ -2,6 +2,7 @@
 		"root_path":"/home/prompt_eng/main/prompt_eng/data",
 		"prompt_path":"prompt",
 		"result_path":"result",
+		"code_path":"code",
 		"csv_path":"csv"
 		},
 "prompts":[1,2,3,4,5,6],

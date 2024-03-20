@@ -2,6 +2,7 @@ import os
 import json
 import pandas as pd
 from itertools import product
+# 주석 추가
 # Path 지정
 config_path = "/home/prompt_eng/main/prompt_eng/src_code/config/config.json"
 with open(config_path,'r') as file:

@@ -5,6 +5,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_core.output_parsers import StrOutputParser
 
+# 테스트 주석
 key_path = "/home/prompt_eng/main/prompt_eng/src_code/config/key.json"
 with open(key_path,'r') as file:
 	key_config = json.load(file)

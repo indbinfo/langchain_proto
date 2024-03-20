@@ -108,11 +108,11 @@ def combine_dict_values(data_dict):
 
 
 
-def load_data(prompt_no, pt_task,component_dict,file_nm):
+def load_data(prompt_no, pt_task,component_dict,task_file):
     tmp_dict = save_components_path(prompt_no, pt_task, component_dict)
     result_dict = save_components_data(tmp_dict)
     df = combine_dict_values(result_dict)
-    task = load_task(prompt_no, pt_task,file_nm)
+    task = load_task(prompt_no, pt_task,task_file)
     
     return df, task
 
@@ -126,11 +126,11 @@ def load_task(prompt_no, pt_task,file_nm):
 def make_py_file(df):
     for idx, row in df.iterrows():
         seq = row['seq']
-        code = row['output']
+        code_txt = row['output']
         file_nm = f"{seq}.py"
         path = os.path.join(code_path,file_nm)
         with open(path, 'w') as file:
-            file.write(code)
+            file.write(code_txt)
 
 
 def save_data(df, user,prompt_no, pt_task):
@@ -144,7 +144,8 @@ def save_data(df, user,prompt_no, pt_task):
         end_idx = prev_idx + len(df)
         seq_range = range(prev_idx,end_idx)
         df['seq'] = seq_range
-        make_py_file(df)
+        if pt_task == "code-gen":
+            make_py_file(df)
         df = pd.concat([org_df,df],axis=0,ignore_index=True)
     else:
         end_idx = len(df)+1
@@ -156,4 +157,3 @@ def save_data(df, user,prompt_no, pt_task):
 
 if __name__ == "__main__":
     update_components_dir()
-    # load_data(user='dw',prompt_no=1, mdl_task='code-gen',component_dict={'context':['1.txt','2.txt'],'exampler':['1.txt','2.txt'],'persona':['1.txt'],'task':['1.txt']})

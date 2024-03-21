@@ -6,16 +6,19 @@ import gpu_performance
 import load_model
 
 class ModelInference:
-    def __init__(self, task, model_id, model_path, prompt_path):
+    def __init__(self, task, model_id, model_path, prompt_path, max_new_tokens, question):
         self.task = task
         self.model_id = model_id
         self.model_path = model_path
         self.prompt_path = prompt_path
         self.gpu_monitor_process = None
+        self.max_new_tokens = max_new_tokens
+        self.question = question
 
     # 모델 로드
     def load_model(self):
         self.modelLoader = load_model.ModelLoader(
+            task=self.task,
             model_id=self.model_id,
             model_path=self.model_path,
             )
@@ -49,18 +52,13 @@ class ModelInference:
         end_event = torch.cuda.Event(enable_timing=True)
         start_event.record()
 
-        if self.task == 'en2ko':
-            question = f'Translate the following text.'
-        elif self.task == 'codeGen':
-            question = f'부산의 동래구 중 많은 매출을 올린 업종을 막대그래프로 그려줘.'
-        
         result = self.modelLoader.loadModel(
             prompt=self.prompt_template,
-            max_new_tokens=200,
-            do_sample=True,
+            max_new_tokens=self.max_new_tokens,
+            do_sample=True, # 다음에 올 토큰에 대한 확률분포에 따라 단어 샘플링하여 문장 완성
             repetition_penalty=1.1, # 중복된 결과값 통제(>1)
             top_k=1,
-        ).invoke({'question' : question})
+        ).invoke({'question' : self.question})
 
         end_event.record()
         torch.cuda.synchronize()
@@ -77,6 +75,6 @@ class ModelInference:
         self.stop_gpu_monitoring()
 
         with open(result_output_file, 'w', encoding='utf-8') as f:
-            f.write('{0} {1} sec :\n{2}'.format(self.model_id, inference_time, result.split('end')[0]))
+            f.write('{0} {1} sec\n{2}'.format(self.model_id, inference_time, result))
 
         print(result.split('end')[0])

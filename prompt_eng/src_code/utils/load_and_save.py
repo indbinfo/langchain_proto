@@ -123,12 +123,12 @@ def load_task(prompt_no, pt_task,file_nm):
 
     return task
 
-def make_py_file(df):
+def make_py_file(user,df):
     for idx, row in df.iterrows():
         seq = row['seq']
         code_txt = row['output']
         file_nm = f"{seq}.py"
-        path = os.path.join(code_path,file_nm)
+        path = os.path.join(code_path,user,file_nm)
         with open(path, 'w') as file:
             file.write(code_txt)
 
@@ -145,7 +145,7 @@ def save_data(df, user,prompt_no, pt_task):
         seq_range = range(prev_idx,end_idx)
         df['seq'] = seq_range
         if pt_task == "code-gen":
-            make_py_file(df)
+            make_py_file(user,df)
         df = pd.concat([org_df,df],axis=0,ignore_index=True)
     else:
         end_idx = len(df)+1

@@ -14,10 +14,10 @@ with open(config_path,'r') as file:
 
 
 class LocalModelLoader:
-    def __init__(self, task):
-        self.task = task
-        self.model_id = config['model'][task]['model_id']
-        self.model_path = config['model'][task]['model_path']
+    def __init__(self, pt_task):
+        self.task = "text-generation"
+        self.model_id = config['model'][pt_task]['model_id']
+        self.model_path = config['model'][pt_task]['model_path']
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, cache_dir=self.model_path)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id, cache_dir=self.model_path)
         
@@ -31,7 +31,8 @@ class LocalModelLoader:
             repetition_penalty=repetition_penalty,
             do_sample=do_sample,
             top_k=top_k,
-            device_map='auto'
+            # device_map='auto'
+            device = 0
         )    
         model = HuggingFacePipeline(pipeline=pipe)
 

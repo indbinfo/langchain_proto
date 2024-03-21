@@ -18,7 +18,7 @@
 				"model_id":"gpt-4-0125-preview"
 			  },
 	 "code-gen":{
-				"model_id":"codellama/CodeLlama-7b-Python-hf",
+				"model_id":"TheBloke/CodeLlama-7B-Python-GPTQ",
 				"model_path":"/opt/models/"
 				 },
 	 "eng-kr":{

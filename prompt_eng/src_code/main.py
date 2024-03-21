@@ -7,18 +7,19 @@ def execute_pipe(user,prompt_no, pt_task, component_dict, task_file):
                             pt_task=pt_task,
                             component_dict=component_dict,
                             task_file=task_file)
-    
-    if pt_task == "kr-eng":
-        loader = OpenaiModelLoader()
-        model = loader.load_model(
-                                  temperature= 0.0000001)
-    else:
-        loader = LocalModelLoader(pt_task)   
-        model = loader.load_model(
-                                  max_new_tokens = "10000",
-                                  do_sample=True,
-                                  repetition_penalty=1.1, # 중복된 결과값 통제(>1)
-                                  top_k=1) 
+    loader = OpenaiModelLoader()
+    model = loader.load_model(temperature= 0.0000001)
+    # if pt_task == "kr-eng":
+    #     loader = OpenaiModelLoader()
+    #     model = loader.load_model(
+    #                               temperature= 0.0000001)
+    # else:
+    #     loader = LocalModelLoader(pt_task)   
+    #     model = loader.load_model(
+    #                               max_new_tokens = 100,
+    #                               do_sample=True,
+    #                               repetition_penalty=1.1, # 중복된 결과값 통제(>1)
+    #                               top_k=1) 
     
     test = LangChainTest(model=model,
                         mdl_task=mdl_task)

@@ -14,7 +14,6 @@ csv_path = config['path']['csv_path']
 main_path = os.path.join(root_path, prompt_path)
 code_path = config['path']['code_path']
 code_path = os.path.join(root_path,result_path, code_path)
-
 prompts = [str(val) for val in config['prompts']]
 pt_tasks= config['pt_tasks']
 components = config['components']
@@ -89,7 +88,7 @@ def combine_dict_values(data_dict):
             if value:
                 row[main_key] = sub_key
                 combination_values.append(value)
-        row['input'] = ' '.join(combination_values)
+        row['input'] = '\n'.join(combination_values)
         if row:  # Ensure the row has data
             data.append(row)
 
@@ -152,7 +151,7 @@ def save_data(df, user,prompt_no, pt_task):
         end_idx = len(df)+1
         df['seq'] = range(1,end_idx)
     df.to_csv(path, index=False)
-       
+ 
     return df
 
 

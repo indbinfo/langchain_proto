@@ -1,3 +1,6 @@
 data/
 src_code/config/key.json
-src_code/utils/__pycache__/
+src_code/utils/__pycache__
+jupyter_test/
+*__pycache__
+test_*.py

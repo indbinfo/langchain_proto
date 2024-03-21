@@ -1,18 +1,29 @@
 {"path":{
-		"root_path":"/home/prompt_eng/main/prompt_eng/data",
-		"prompt_path":"prompt",
-		"result_path":"result",
-		"code_path":"code",
-		"csv_path":"csv"
-		},
+	"root_path":"/home/prompt_eng/main/prompt_eng/data",
+	"prompt_path":"prompt",
+	"result_path":"result",
+	"code_path":"code",
+	"csv_path":"csv"
+	},
 "prompts":[1,2,3,4,5,6],
 "pt_tasks":["code-gen",
-			"eng-kr",
-			"kr-eng"],
+		"eng-kr",
+		"kr-eng"],
 "components":["context",
-			  "exampler",
-			  "format",
-			  "persona",
-			  "task"],
-"model":{"openai":"gpt-3.5-turbo-0125"}
+		  "exampler",
+		  "format",
+		  "persona",
+		  "task"],
+"model":{"kr-eng":{
+				"model_id":"gpt-4-0125-preview"
+			  },
+	 "code-gen":{
+				"model_id":"codellama/CodeLlama-7b-Python-hf",
+				"model_path":"/opt/models/"
+				 },
+	 "eng-kr":{
+				"model_id":"traintogpb/llama-2-en2ko-translator-7b-qlora-bf16-upscaled",
+				"model_path":"/opt/models/"
+			 }
+	}
 }

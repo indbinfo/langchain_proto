@@ -25,5 +25,42 @@
 				"model_id":"traintogpb/llama-2-en2ko-translator-7b-qlora-bf16-upscaled",
 				"model_path":"/opt/models/"
 			 }
-	}
+	},
+"llama_model":{"kr-eng":{
+				"starling-lm":{
+							"temperature":0.00001,
+							"repeat_penalty":1
+							},
+				"mistral":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					},
+				"llama2:13b":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					},
+				"llama2:70b":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					},								
+				"code-gen":{
+				"codellama:70b-python":{
+							"temperature":0.00001,
+							"repeat_penalty":1
+							},
+				"deepseek-coder:33b":{
+							"temperature":0.00001,
+							"repeat_penalty":1
+							},
+				"codellama":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+							},
+				"wizardcoder:34b-python":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					}
+					}
+			}
+		}
 }

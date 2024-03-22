@@ -13,7 +13,7 @@ class LangChainTest:
 
 
 	def apply_chain(self,input_txt):
-		prompt_format = "question:{question} {input_txt}"
+		prompt_format = "{input_txt} {question}"
 		template = PromptTemplate.from_template(prompt_format)
 		output_parser = StrOutputParser()
 		chain = template | self.model | output_parser
@@ -36,7 +36,4 @@ class LangChainTest:
 		df['output'] = df['input'].apply(self.apply_chain)
 
 		return df
-	
-
-		
 

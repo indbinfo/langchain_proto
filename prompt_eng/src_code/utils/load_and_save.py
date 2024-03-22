@@ -133,7 +133,8 @@ def make_py_file(user,df):
             file.write(code_txt)
 
 
-def save_data(df, user,prompt_no, pt_task):
+def save_data(df, user,prompt_no, pt_task, model_id):
+    df['model_id'] = model_id
     df['user'] = user
     df['prompt_no'] = prompt_no
     df['pt_task'] = pt_task

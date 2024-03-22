@@ -1,16 +1,25 @@
 from utils.lang_pipe import LangChainTest
 from utils.load_and_save import load_data, save_data
-from utils.load_model import OllamaModelLoader
+from utils.load_model import LocalModelLoader, OpenaiModelLoader
 
-def execute_pipe(user,prompt_no, model_id, pt_task, component_dict, task_file):
+def execute_pipe(user,prompt_no, pt_task, component_dict, task_file):
     df, mdl_task = load_data(prompt_no=prompt_no,
                             pt_task=pt_task,
                             component_dict=component_dict,
                             task_file=task_file)
-    if pt_task != "code-gen":
-        pt_task="kr-eng"
-    loader = OllamaModelLoader(model_id=model_id, pt_task=pt_task)
-    model = loader.load_model()
+    loader = OpenaiModelLoader()
+    model = loader.load_model(temperature= 0)
+    if pt_task == "code-gen":
+        loader = OpenaiModelLoader()
+        model = loader.load_model(
+                                  temperature= 0.0000001)
+    # else:
+    #     loader = LocalModelLoader(pt_task)   
+    #     model = loader.load_model(
+    #                               max_new_tokens = 100,
+    #                               do_sample=True,
+    #                               repetition_penalty=1.1, # 중복된 결과값 통제(>1)
+    #                               top_k=1) 
     
     test = LangChainTest(model=model,
                         mdl_task=mdl_task)
@@ -18,7 +27,6 @@ def execute_pipe(user,prompt_no, model_id, pt_task, component_dict, task_file):
 
 
     save_data(df=result_df,
-            model_id = model_id,
             user=user,
             prompt_no=prompt_no,
             pt_task=pt_task)
@@ -26,7 +34,6 @@ def execute_pipe(user,prompt_no, model_id, pt_task, component_dict, task_file):
 
 if __name__ == "__main__":
     execute_pipe(user="ty",
-            model_id = "llama2:13b",
 			prompt_no=2,
 			pt_task="kr-eng", 
 			component_dict= {

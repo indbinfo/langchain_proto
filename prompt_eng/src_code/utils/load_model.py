@@ -1,8 +1,10 @@
 import json
 from langchain_openai import ChatOpenAI
+from langchain_community.llms import Ollama
 from langchain_community.llms.huggingface_pipeline import HuggingFacePipeline
 from langchain_core.output_parsers import StrOutputParser
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from .custom_ollama import Ollama
 
 key_path = "/home/prompt_eng/main/prompt_eng/src_code/config/key.json"
 with open(key_path,'r') as file:
@@ -13,10 +15,24 @@ with open(config_path,'r') as file:
 	config = json.load(file)
 
 
+class OllamaModelLoader:
+    def __init__(self, model_id,pt_task):
+        self.model_id = model_id
+        self.temperature = config["llama_model"][pt_task][model_id]['temperature']
+        self.repeat_penalty = config["llama_model"][pt_task][model_id]['repeat_penalty']
+        
+    def load_model(self):
+        model = Ollama(model=self.model_id,
+			temperature=self.temperature,
+			repeat_penalty=self.repeat_penalty,
+            keep_alive=1
+			)
+        return model
+
 class LocalModelLoader:
-    def __init__(self, pt_task):
+    def __init__(self, model_id, pt_task):
         self.task = "text-generation"
-        self.model_id = config['model'][pt_task]['model_id']
+        self.model_id = model_id
         self.model_path = config['model'][pt_task]['model_path']
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_id, cache_dir=self.model_path)
         self.model = AutoModelForCausalLM.from_pretrained(self.model_id, cache_dir=self.model_path)

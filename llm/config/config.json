@@ -1,3 +1,7 @@
 {
-    "model_path" : "/opt/models/"
+    "path" : 
+        {
+            "model_path" : "/opt/models/",
+            "prompt_path" : "/opt/sample_prompt/"
+        }
 }

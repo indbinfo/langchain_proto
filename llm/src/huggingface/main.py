@@ -12,21 +12,24 @@ if __name__ == '__main__':
     models_config = [
         {
             'task':'text-generation',
-            'model_id' : 'traintogpb/llama-2-en2ko-translator-7b-qlora-bf16-upscaled',
+            # 'model_id' : 'traintogpb/llama-2-en2ko-translator-7b-qlora-bf16-upscaled',
+            # 'model_id' : 'Salesforce/codegen25-7b-mono',
+            # 'model_id' : 'Salesforce/codegen2-7B',
+            'model_id' : 'OpenBuddy/openbuddy-mistral-7b-v13',
             'model_path' : config['model_path'],
             'prompt_path' : '/opt/sample_prompt/prompt1/input/eng-kr.txt',
             'max_new_tokens' : 200,
             'question' : 'Translate the following text'
         },
 
-        {
-            'task' : 'text-generation',
-            'model_id' : 'TheBloke/CodeLlama-7B-Python-GPTQ',
-            'model_path' : config['model_path'],
-            'prompt_path' : '/opt/sample_prompt/prompt1/input/code.txt',
-            'max_new_tokens' : 200,
-            'question' : '부산의 동래구 중 많은 매출을 올린 업종을 막대그래프로 그려줘.'
-        },
+        # {
+        #     'task' : 'text-generation',
+        #     'model_id' : 'TheBloke/CodeLlama-7B-Python-GPTQ',
+        #     'model_path' : config['model_path'],
+        #     'prompt_path' : '/opt/sample_prompt/prompt1/input/code.txt',
+        #     'max_new_tokens' : 200,
+        #     'question' : '부산의 동래구 중 많은 매출을 올린 업종을 막대그래프로 그려줘.'
+        # },
     ]
 
     for config in models_config:

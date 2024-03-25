@@ -1,0 +1,69 @@
+{"path":{
+	"root_path":"/home/prompt_eng/main/prompt_eng/data",
+	"prompt_path":"prompt",
+	"result_path":"result",
+	"code_path":"code",
+	"csv_path":"csv"
+	},
+"prompts":[1,2,3,4,5,6],
+"pt_tasks":["code-gen",
+		"eng-kr",
+		"kr-eng"],
+"components":["context",
+		  "exampler",
+		  "format",
+		  "persona",
+		  "task"],
+"model":{"kr-eng":{
+				"model_id":"gpt-4-0125-preview"
+			  },
+	 "code-gen":{
+				"model_id":"TheBloke/CodeLlama-7B-Python-GPTQ",
+				"model_path":"/opt/models/"
+				 },
+	 "eng-kr":{
+				"model_id":"traintogpb/llama-2-en2ko-translator-7b-qlora-bf16-upscaled",
+				"model_path":"/opt/models/"
+			 }
+	},
+"llama_model":{"kr-eng":{
+				"starling-lm":{
+							"temperature":0.00001,
+							"repeat_penalty":1
+							},
+				"mistral":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					},
+				"llama2:13b":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					},
+				"llama2:70b":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+					}
+				},
+				"code-gen":{
+				"codellama:70b-python":{
+							"temperature":0.00001,
+							"repeat_penalty":1
+							},
+				"deepseek-coder:33b":{
+							"temperature":0.00001,
+							"repeat_penalty":1
+							},
+				"codellama":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+							},
+				"wizardcoder:34b-python":{
+					"temperature":0.00001,
+					"repeat_penalty":1
+										}
+							}
+			},
+"template_file":{"kr-eng":"kr-eng_template.txt",
+				"code-gen":"code-gen_template.txt",
+				"eng-kr":"eng-kr_template.txt"}
+}

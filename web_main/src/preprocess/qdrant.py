@@ -29,9 +29,15 @@ class VectorDB:
                                     model_kwargs={'device': 'cpu'},
                                     encode_kwargs={'normalize_embeddings': True}
                                     )
-    def create_client(self):
+    def create_connection(self):
         client = QdrantClient(host=self.host, api_key=self.api_key)
         return client
+    def create_Qdrant_obj(self,client, collection_name):
+        Qdrant(client=client,
+                    collection_name=collection_name,
+                    embeddings=self.embeddings
+                    )
+        return qdrant_obj
     
     def tiktoken_len(self, text):
         tokenizer = tiktoken.get_encoding("cl100k_base")
@@ -47,30 +53,18 @@ class VectorDB:
         chunks = text_splitter.split_text(text)
         return chunks
 
-    def add_vectorstore(self, text_chunks, collection_name,ids, metadatas):
-        vectorstore = QdrantClient(
-            client=client,
-            collection_name=collection_name,
-            embeddings=get_embedding()
-        )
-        vectorstore.add_texts(text_chunks
+    def add_vectorstore(self, client, text_chunks, collection_name,ids, metadatas):
+        vectordb = create_Qdrant_obj(self,client, collection_name)
+        vectordb.add_texts(text_chunks
                             ,ids=ids
                             ,metadatas=metadatas
                             )
         return vectorstore
-
-# Similarity search with score by filter
-def qdrant_similarity_search(task, collection_name, filter):
-    client = qdrant_client.QdrantClient(
-                os.getenv("QDRANT_HOST"),
-                api_key=os.getenv("QDRANT_API_KEY")
-                )
-    vectordb = QdrantClient(client=client,
-                collection_name=collection_name,
-                embeddings=get_embedding()
-                )
-    search_result = vectordb.similarity_search_with_score(task 
-                                        #, k=k
-                                        #, score_threshold =0.3         
-                                        , filter=filter)
-    return search_result
+    # Similarity search with score by filter
+    def qdrant_similarity_search(self, client, task, collection_name, filter):
+        vectordb = create_Qdrant_obj(self,client, collection_name)
+        search_result = vectordb.similarity_search_with_score(task 
+                                            #, k=k
+                                            #, score_threshold =0.3         
+                                            , filter=filter)
+        return search_result

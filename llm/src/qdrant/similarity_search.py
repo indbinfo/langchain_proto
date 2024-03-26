@@ -101,20 +101,10 @@ config = {
     'model_id' : 'wizardcoder:34b-python',
     'collection_name' : 'question',
     'client' : client,
-    'task' : '내 휴대전화번호가 뭐야?',
+    'task' : '카드 소비가 지역 경제에 미치는 영향이 어떻다고 생각해?',
     }
 
 qa_response = QAResponse(**config)
-
-# valid_question = qa_response.get_filter(
-#     key="filter", 
-#     value="유효질문"
-# )
-
-# invalid_question = qa_response.get_filter(
-#     key="filter", 
-#     value="무효질문"
-# )
 
 search_result = qa_response.qdrant_similarity_search(
     k=10, 
@@ -122,6 +112,8 @@ search_result = qa_response.qdrant_similarity_search(
     filter=None,
 )
 
-print(qa_response.isValid(search_result))
+print(f'is valid: {qa_response.isValid(search_result)}')
+print(f'qdrant_similarity_search: {search_result}')
+
 # response = qa_response.qdrant_qa_response()
-# print(response)
+# print(f'qa_response: {response}')

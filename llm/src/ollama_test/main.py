@@ -5,6 +5,19 @@ from streamlit_extras.stylable_container import stylable_container
 import streamlit as st
 import base64
 import json
+import time
+
+def simulate_typing_effect(words, typing_speed=.1):
+    placeholder = st.empty()
+    output_text = " "
+    for word in words:
+        for letter in word:
+            output_text += letter
+            placeholder.text(output_text)
+            time.sleep(typing_speed)
+
+        output_text += ' '
+        placeholder.text(output_text)
 
 def load_config():
     with open('/home/llm/main/llm/config/config.json', 'r') as f:
@@ -87,6 +100,8 @@ def main_ui():
                             </table><br>
                     """, unsafe_allow_html=True
                     )
+                    # words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
+                    # simulate_typing_effect(words, typing_speed=0.1)
 
 if __name__ == "__main__":
     main_ui()

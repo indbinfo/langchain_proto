@@ -30,9 +30,9 @@ def get_image(image_path):
 def init_page(root_dir):
     st.set_page_config(
         page_title='BC카드 PoC', 
-        page_icon=root_dir + 'result/bccard_logo.png')
+        page_icon='/home/llm/main/llm/src/ollama_test/bccard_logo.png')
     
-    image_base64 = get_image('/home/llm/main/llm/result/bccard_logo.png')
+    image_base64 = get_image('/home/llm/main/llm/src/ollama_test/bccard_logo.png')
 
     st.markdown(f"""
     <img src="data:image/png;base64,{image_base64}" alt="Local Image" style="width: 50px; height: auto;"> 

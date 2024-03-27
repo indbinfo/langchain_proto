@@ -7,7 +7,7 @@ from qdrant_client.http import models
 import json
 import sys
 
-with open('/home/llm/main/web_main/config/qdrant.json', 'r', encoding='utf8') as f:
+with open('/home/llm/main/llm/config/qdrant.json', 'r', encoding='utf8') as f:
     config = json.load(f)
 
 QDRANT_HOST = config['QDRANT_HOST']

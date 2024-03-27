@@ -1,4 +1,6 @@
+__pycache__
+
 result/
 log/
 
-__pycache__
+*.ipynb

@@ -5,8 +5,9 @@ from langchain.chains import RetrievalQA
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 import json
+import sys
 
-with open('/home/llm/langchain_proto/web_main/config/qdrant.json', 'r', encoding='utf8') as f:
+with open('/home/llm/main/web_main/config/qdrant.json', 'r', encoding='utf8') as f:
     config = json.load(f)
 
 QDRANT_HOST = config['QDRANT_HOST']
@@ -99,20 +100,20 @@ class QAResponse:
 
 config = {
     'model_id' : 'wizardcoder:34b-python',
-    'collection_name' : 'question',
+    'collection_name' : 'context',
     'client' : client,
-    'task' : '카드 소비가 지역 경제에 미치는 영향이 어떻다고 생각해?',
+    'task' : sys.argv[1]
     }
 
 qa_response = QAResponse(**config)
 
 search_result = qa_response.qdrant_similarity_search(
-    k=10, 
-    score_threshold=.3,
+    k=2, 
+    score_threshold=.4,
     filter=None,
 )
 
-print(f'is valid: {qa_response.isValid(search_result)}')
+print(f'is valid: {qa_response.isValid(search_result)}\n')
 print(f'qdrant_similarity_search: {search_result}')
 
 # response = qa_response.qdrant_qa_response()

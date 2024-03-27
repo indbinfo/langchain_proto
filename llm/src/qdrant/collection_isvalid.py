@@ -57,7 +57,7 @@ class VectorDB:
         return vectorstore
 
 if __name__ == "__main__":
-    collection_name = 'question'
+    collection_name = 'context'
     vectordb = VectorDB(collection_name=collection_name, size=768, client=client)
 
     vectordb.create_collection()

@@ -100,21 +100,35 @@ class QAResponse:
 
 config = {
     'model_id' : 'wizardcoder:34b-python',
-    'collection_name' : 'context',
+    'collection_name' : 'context_ys',
     'client' : client,
     'task' : sys.argv[1]
     }
 
 qa_response = QAResponse(**config)
 
-search_result = qa_response.qdrant_similarity_search(
+result_k1 = qa_response.qdrant_similarity_search(
     k=1, 
-    score_threshold=.4,
-    filter=None,
+    score_threshold=0,
+    filter=None
 )
 
-print(f'is valid: {qa_response.isValid(search_result)}\n')
-print(f'qdrant_similarity_search: {search_result}')
+document, score = result_k1[0]
+filter_value = document.metadata['filter']
+print(filter_value)
 
-# response = qa_response.qdrant_qa_response()
-# print(f'qa_response: {response}')
+search_result = qa_response.qdrant_similarity_search(
+    score_threshold=0,
+    k=100,
+    filter=qa_response.get_filter(
+        key='filter', 
+        value=filter_value
+        ),
+    )
+
+sorted_result = sorted(search_result, key=lambda x: x[0].metadata['_id'])
+
+for item in sorted_result:
+    document = item[0]
+    with open('a.txt', 'a', encoding='utf-8') as f:
+        print(document.metadata['_id'], document.metadata['filter'])

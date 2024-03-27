@@ -4,11 +4,11 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 
 
 class ModelLoader:
-    def __init__(self, model_id, model_path, task='text-generation'):
+    def __init__(self, model_id, model_path, task):
         self.model_id = model_id
         self.task = task
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id, cache_dir=model_path)
-        self.model = AutoModelForCausalLM.from_pretrained(model_id, cache_dir=model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_id, cache_dir=model_path, device_map='auto')
+        self.model = AutoModelForCausalLM.from_pretrained(model_id, cache_dir=model_path, device_map='auto')
     
     def loadModel(self, prompt, max_new_tokens, repetition_penalty, top_k, do_sample=False):
         pipe = pipeline(

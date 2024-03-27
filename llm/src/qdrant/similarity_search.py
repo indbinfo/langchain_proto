@@ -108,7 +108,7 @@ config = {
 qa_response = QAResponse(**config)
 
 search_result = qa_response.qdrant_similarity_search(
-    k=2, 
+    k=1, 
     score_threshold=.4,
     filter=None,
 )

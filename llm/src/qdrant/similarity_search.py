@@ -130,5 +130,4 @@ sorted_result = sorted(search_result, key=lambda x: x[0].metadata['_id'])
 
 for item in sorted_result:
     document = item[0]
-    with open('a.txt', 'a', encoding='utf-8') as f:
-        print(document.metadata['_id'], document.metadata['filter'])
+    print(document.metadata['_id'], document.metadata['filter'])

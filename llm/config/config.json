@@ -2,7 +2,8 @@
     "path" : {
             "prompt_path" : "/opt/sample_prompt/",
             "result_path" : "result/",
-            "log_path" : "log/"
+            "log_path" : "log/",
+            "context_path" : "context/"
     },
     "ollama_model" : {
         "mistral" : {

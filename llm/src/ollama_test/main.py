@@ -5,9 +5,13 @@ from streamlit_extras.stylable_container import stylable_container
 import streamlit as st
 import base64
 import json
-import time
+import asyncio
 
-def simulate_typing_effect(words, typing_speed=.1):
+import nest_asyncio
+
+nest_asyncio.apply()
+
+async def simulate_typing_effect(words, typing_speed=.1):
     placeholder = st.empty()
     output_text = " "
     font_style = "<span style='font-family: nanum;'>"
@@ -15,7 +19,7 @@ def simulate_typing_effect(words, typing_speed=.1):
         for letter in word:
             output_text += letter
             placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
-            time.sleep(typing_speed)
+            await asyncio.sleep(typing_speed)  # 비동기적으로 대기합니다.
 
         output_text += ' '
         placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
@@ -59,7 +63,7 @@ def get_response(code_return, user_question, model_id):
     chain = prompt | llm | StrOutputParser()
     return chain.stream({'input': user_question})
 
-def main_ui():
+async def main_ui():
     config = load_config()
     root_dir = '/home/llm/main/llm/'
     result_path = root_dir + config['path']['result_path']
@@ -83,27 +87,14 @@ def main_ui():
                 if user_question:
                     with st.spinner('실행중입니다..'):
                         response = get_response(code_return, user_question, 'wizardcoder:34b-python')
+                        words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
+                        await simulate_typing_effect(words, typing_speed=0.1)  # 비동기 함수 호출
                         st.image(root_dir + 'result/corp_rate.png', use_column_width=True)
                         st.write_stream(response)
 
-                        st.markdown("""<table class="info-table" style="margin-left: auto; margin-right: auto;">
-                                <tr>
-                                    <th>제공기관</th>
-                                    <th>설명</th>
-                                    <th>가격</th>
-                                    <th>유관상품</th>
-                                </tr>
-                                <tr>
-                                    <td>비씨카드</td>
-                                    <td>내국인 카드소비데이터</td>
-                                    <td>3,000,000원</td>
-                                    <td><a href="https://www.bigdata-finance.kr/dataset/datasetView.do?datastId=SET0300009" style="font-weight: bold;">바로가기</a></td>
-                                </tr>
-                                </table><br>
+                        st.markdown("""<table class="info-table" ... </table><br>
                         """, unsafe_allow_html=True
                         )
-                        words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
-                        simulate_typing_effect(words, typing_speed=0.1)
-
+                       
 if __name__ == "__main__":
-    main_ui()
+    asyncio.run(main_ui())

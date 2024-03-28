@@ -4,3 +4,4 @@ result/
 log/
 
 *.ipynb
+qdrant.json

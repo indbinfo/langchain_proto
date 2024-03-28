@@ -8,12 +8,21 @@ import tiktoken
 import json
 import sys
 
+home_dir = '/home/llm/main/llm/'
+config_path = home_dir + 'config/config.json'
+
 # config
-with open('/home/llm/main/web_main/config/qdrant.json', 'r', encoding='utf8') as f:
+with open(config_path, 'r', encoding='utf8') as f:
     config = json.load(f)
 
-QDRANT_HOST = config['QDRANT_HOST']
-QDRANT_API_KEY = config['QDRANT_API_KEY']
+context_path = home_dir + config['path']['context_path']
+
+# qdrant config
+with open(home_dir + 'config/qdrant.json', 'r', encoding='utf8') as f:
+    qdrant = json.load(f)
+
+QDRANT_HOST = qdrant['QDRANT_HOST']
+QDRANT_API_KEY = qdrant['QDRANT_API_KEY']
 
 client = QdrantClient(
     QDRANT_HOST,
@@ -67,7 +76,7 @@ class VectorDB:
     def get_chunks(self, text):
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=400,
-            chunk_overlap=20,
+            chunk_overlap=40,
             length_function=self.tiktoken_len
         )
         chunks = text_splitter.split_text(text)
@@ -79,22 +88,22 @@ if __name__ == "__main__":
 
     vectordb.create_collection()
 
-    with open("/home/llm/main/llm/context/1.txt", 'rt', encoding='UTF8') as f:
+    with open(context_path + "1.txt", 'rt', encoding='UTF8') as f:
         prompt_1 = f.read()
 
-    with open("/home/llm/main/llm/context/2.txt", 'rt', encoding='UTF8') as f:
+    with open(context_path + "2.txt", 'rt', encoding='UTF8') as f:
         prompt_2 = f.read()
 
-    with open("/home/llm/main/llm/context/3.txt", 'rt', encoding='UTF8') as f:
+    with open(context_path + "3.txt", 'rt', encoding='UTF8') as f:
         prompt_3 = f.read()
 
-    with open("/home/llm/main/llm/context/4.txt", 'rt', encoding='UTF8') as f:
+    with open(context_path + "4.txt", 'rt', encoding='UTF8') as f:
         prompt_4 = f.read()
 
-    with open("/home/llm/main/llm/context/5.txt", 'rt', encoding='UTF8') as f:
+    with open(context_path + "5.txt", 'rt', encoding='UTF8') as f:
         prompt_5 = f.read()
 
-    with open("/home/llm/main/llm/context/6.txt", 'rt', encoding='UTF8') as f:
+    with open(context_path + "6.txt", 'rt', encoding='UTF8') as f:
         prompt_6 = f.read()
 
     chunks_1 = vectordb.get_chunks(prompt_1)
@@ -104,7 +113,7 @@ if __name__ == "__main__":
     chunks_5 = vectordb.get_chunks(prompt_5)
     chunks_6 = vectordb.get_chunks(prompt_6)
     chunck_list = sum([chunks_1,chunks_2, chunks_3, chunks_4, chunks_5, chunks_6],[] )
-
+    
     meta_1 = list(np.repeat({"filter":"prompt_1"},len(chunks_1)))
     meta_2 = list(np.repeat({"filter":"prompt_2"},len(chunks_2)))
     meta_3 = list(np.repeat({"filter":"prompt_3"},len(chunks_3)))
@@ -117,3 +126,38 @@ if __name__ == "__main__":
     ids = list(range(len(chunck_list))),
     metadatas=sum([meta_1, meta_2, meta_3, meta_4, meta_5, meta_6], [])
 )
+    client.set_payload(
+    collection_name=collection_name,
+    payload={'filter': 'prompt_1'},
+    points=list(range(0,len(chunks_1)))
+    )
+
+    client.set_payload(
+    collection_name=collection_name,
+    payload={'filter': 'prompt_2'},
+    points=list(range(len(chunks_1), len(chunks_1 + chunks_2)))
+    )
+
+    client.set_payload(
+    collection_name=collection_name,
+    payload={'filter': 'prompt_3'},
+    points=list(range(len(chunks_1 + chunks_2), len(chunks_1 + chunks_2 + chunks_3)))
+    )
+
+    client.set_payload(
+    collection_name=collection_name,
+    payload={'filter': 'prompt_4'},
+    points=list(range(len(chunks_1 + chunks_2 + chunks_3), len(chunks_1 + chunks_2 + chunks_3 + chunks_4)))
+    )
+
+    client.set_payload(
+    collection_name=collection_name,
+    payload={'filter': 'prompt_5'},
+    points=list(range(len(chunks_1 + chunks_2 + chunks_3 + chunks_4), len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5)))
+    )
+
+    client.set_payload(
+    collection_name=collection_name,
+    payload={'filter': 'prompt_6'},
+    points=list(range(len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5), len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5 + chunks_6)))
+    )

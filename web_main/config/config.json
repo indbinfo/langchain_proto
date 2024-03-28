@@ -1,9 +1,16 @@
 {"path":{
-	"root_path":"/home/prompt_eng/main/prompt_eng/data",
+	"root_path":"/home/prompt_eng/langchain/langchain_proto/web_main/data",
 	"prompt_path":"prompt",
 	"result_path":"result",
+	"graph_path":"graph",
 	"code_path":"code",
-	"csv_path":"csv"
+	"csv_path":"csv",
+	"csv_file":"data.csv",
+	"report_path":"text",
+	"report_file":"report_{}.txt",
+	"code_file":"code_{}.py",
+	"graph_file":"graph_{}.png",
+	"logger_path":"/home/prompt_eng/langchain/langchain_proto/web_main/log"
 	},
 "prompts":[1,2,3,4,5,6],
 "pt_tasks":["code-gen",
@@ -64,6 +71,6 @@
 							}
 			},
 "template_file":{"kr-eng":"kr-eng_template.txt",
-				"code-gen":"code-gen_template.txt",
+				"code-gen":"template.txt",
 				"eng-kr":"eng-kr_template.txt"}
 }

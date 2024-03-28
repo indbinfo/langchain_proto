@@ -1,7 +1,7 @@
 import logging
 import os
 
-def setup_logger(log_directory):
+def setup_logger(log_directory, log_file):
     """
     Sets up a basic logger that writes log messages to a file named app.log
     in the specified directory.
@@ -14,7 +14,7 @@ def setup_logger(log_directory):
         os.makedirs(log_directory)
     
     # Define the path to the log file
-    log_file_path = os.path.join(log_directory, "main.log")
+    log_file_path = os.path.join(log_directory, log_file)
     
     # Create a basic logger
     logger = logging.getLogger("basicLogger")

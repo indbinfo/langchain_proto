@@ -13,13 +13,16 @@ from preprocess.save_file import save_execute_python
 import logging
 import asyncio
 import nest_asyncio
+from custom_log import setup_logger
 
-logger = logging.getLogger("main")
+nest_asyncio.apply()
+# logger = logging.getLogger("main")
 
 config_path = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
 with open(config_path) as f:
     config = json.load(f)
-
+logger_path = config["path"]["logger_path"]
+logger = setup_logger(logger_path,"main.log")
 file_idx = datetime.now().strftime("%m%d_%H:%M")
 root_path = config['path']['root_path']
 save_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"])
@@ -27,9 +30,13 @@ save_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"
 # code_path = os.path.join(save_dir,config["path"]["code_path"],code_file)
 logo_file = os.path.join(root_path, 'bccard_logo.png')
 
+loading_txt = "AI가 분석에 맞는 코드를 생성중입니다. 분석을 하는동안 잠시만 기다려주세요"
+dt_desc_txt = """
+            해당 그래프는 BC 카드의 내국인 소비 데이터를 기반으로 생성하였습니다.
+            내국인 소비 데이터는 일자/시간/연령대별 전국의 가맹점 소비 내역을 포함하고 있습니다.
+            자세한 사항은 위의 아래 링크를 참고해주세요"""
 
-
-def simulate_typing_effect(text, typing_speed=.1):
+async def simulate_typing_effect(text, typing_speed=.1):
     words = [word for word in text]
     placeholder = st.empty()
     output_text = " "
@@ -38,7 +45,7 @@ def simulate_typing_effect(text, typing_speed=.1):
         for letter in word:
             output_text += letter
             placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
-            time.sleep(typing_speed)
+            await asyncio.sleep(typing_speed)  # 비동기적으로 대기합니다.
 
         # output_text += ' '
         placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
@@ -73,7 +80,7 @@ def get_model(model_id):
     return Ollama(model=model_id)
 
 
-def main_ui():
+async def main_ui():
     init_page()
     
     with st.form('question_answer'):
@@ -87,20 +94,21 @@ def main_ui():
             }
             """):
             if st.form_submit_button(label='검색하기'):
+                start_time = time.time()
                 if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
                     st.session_state.last_question = user_question
                     # response = get_response(code_return, user_question, 'wizardcoder:34b-python')
                     with st.spinner('AI가 답변을 생성중입니다.. 잠시만 기다려주세요'):
+                        await simulate_typing_effect(loading_txt, typing_speed=0.1)
                         try:
-                            start_time = time.time()
                             response, graph_path, report_path = response_from_llm(user_question)
                             total_time = time.time() - start_time
-                            logger.info(f"소요 시간:{total_time}")
+                            
                         except Exception as e:
                             st.write("모델이 질문에 답변하지 못하였습니다.")
                             st.write(e)
                     
-                    simulate_typing_effect(response)
+                    await simulate_typing_effect(response)
                     # st.image(logo_file, use_column_width=True)
                     if not response:
                         st.write("요청 주신 질문에 대해서 답변이 어렵습니다")
@@ -108,7 +116,9 @@ def main_ui():
                         st.image(graph_path, use_column_width=True)
                         with open(report_path, 'r') as f:
                             report = f.read()
-                        simulate_typing_effect(report)
+                        await simulate_typing_effect(report)
+                        logger.info(f"소요 시간:{total_time}")
+                        await simulate_typing_effect(dt_desc_txt, typing_speed=0.1)
                         st.markdown("""<table class="info-table" style="margin-left: auto; margin-right: auto;">
                                 <tr>
                                     <th>제공기관</th>
@@ -129,4 +139,4 @@ def main_ui():
                         # simulate_typing_effect(words, typing_speed=0.1)
 
 if __name__ == "__main__":
-    main_ui()
+    asyncio.run(main_ui())

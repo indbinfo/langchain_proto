@@ -11,25 +11,31 @@ from custom_log import setup_logger
 
 config_path = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
 
-file_idx = datetime.now().strftime("%m%d_%H:%M")
+# file_idx = datetime.now().strftime("%M")
+file_idx = 1
 
 with open (config_path) as f:
     config = json.load(f)
 # csv_dir = os.path.join(config["path"]["src_path"])
 graph_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"],config["path"]["graph_path"])
 save_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"])
-code_file = config["path"]["code_file"].format(file_idx)
-report_file = config["path"]["report_file"].format(file_idx)
+# code_file = config["path"]["code_file"].format(file_idx)
 report_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"],config["path"]["report_path"])
-graph_file = config["path"]["graph_file"].format(file_idx)
-code_path = os.path.join(save_dir,code_file)
+# report_file = config["path"]["report_file"].format(file_idx)
+# graph_file = config["path"]["graph_file"].format(file_idx)
+# code_path = os.path.join(save_dir,code_file)
 logger_path = config["path"]["logger_path"]
+# graph_path = os.path.join(graph_dir, graph_file)
+# report_path = os.path.join(report_dir, report_file)
+logger = setup_logger(logger_path,'main.py')
 
-logger = setup_logger(logger_path)
-
-def response_from_llm(user_prompt):
-    graph_path = os.path.join(graph_dir, graph_file)
+def response_from_llm(user_prompt, file_idx = 1):
+    code_file = config["path"]["code_file"].format(file_idx)
+    code_path = os.path.join(save_dir,code_file)
+    report_file = config["path"]["report_file"].format(file_idx)
     report_path = os.path.join(report_dir, report_file)
+    graph_file = config["path"]["graph_file"].format(file_idx)
+    graph_path = os.path.join(graph_dir, graph_file)
     #user_prompt = "독산동의 법인카드 매출을 시간대 별로 알려줘"
     # template 로드
     code_gen_input = ["context","report_file","graph_file","task"]
@@ -63,25 +69,26 @@ def response_from_llm(user_prompt):
 								task=user_prompt,
 								collection_name="context",
 								k=1)
-    logger.info(f"prompt_query:\n{prompt_query_doc}")
+    #logger.info(f"prompt_query:\n{prompt_query_doc}")
     prompt_no = prompt_query_doc[0][0].metadata['filter']
-    logger.info(f"prompt_no:{prompt_no}")
+    # logger.info(f"prompt_no:{prompt_no}")
     data = qdrant.qdrant_similarity_search(client=qd_client,
 								task=user_prompt,
-								collection_name="context",
+								collection_name="document",
 								filter=get_filter("filter",prompt_no),
-								k=100)
-    
-    
-    point_ls = []
-    for idx,point in enumerate(data):
-        point_ls.append((point[0].metadata['_id'],point[0].page_content))
-    point_ls = sorted(point_ls)
-    # print(point_ls)
-    point_ls = [point[1] for point in point_ls]
-    logger.info(f"point_ls:{point_ls}")
-    context = remove_overlaps_in_sequence(point_ls)
-    logger.info(f"context:\n{context}")
+								k=1)
+    logger.info(f"프롬프트 번호:{prompt_no}")
+    context = data[0][0].page_content
+    # logger.info(f"컨텍스트:\n{context}")
+    # point_ls = []
+    # for idx,point in enumerate(data):
+    #     point_ls.append((point[0].metadata['_id'],point[0].page_content))
+    # point_ls = sorted(point_ls)
+    # # print(point_ls)
+    # point_ls = [point[1] for point in point_ls]
+    # logger.info(f"point_ls:{point_ls}")
+    # context = remove_overlaps_in_sequence(point_ls)
+    # logger.info(f"context:\n{context}")
     # print(f"context:\n{context}")
     # 코드 생성 모델 입력
     # print(context)
@@ -99,7 +106,9 @@ def response_from_llm(user_prompt):
     # chain = setup_and_retrieval | partial_prompt | code_gen_mdl | StrOutputParser()
     chain = partial_prompt | code_gen_mdl | StrOutputParser()
     code_txt = chain.invoke({"task":user_prompt})
-    logger.info(f"code_txt:\n{code_txt}")
+    logger.info(f"코드 결과:\n{code_txt}")
+    prompt_result = partial_prompt.format(task=user_prompt)
+    logger.info(f"프롬프트 결과:\n{prompt_result}")
     # print(code_txt)
 
     # file_dt = []
@@ -109,6 +118,7 @@ def response_from_llm(user_prompt):
     #     print(word, end="", flush=True)
     
     save_execute_python(code_txt,code_path)
+    
     # stream = chain.stream(user_prompt)
     
 

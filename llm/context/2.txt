@@ -44,15 +44,17 @@ AGE_10_CD : ['30대' '60대' '20대' '40대' '70대이상' '50대' '10대이하'
 LIFE_GB_CD : ['1인가구' '노인가구' '초중고자녀' '성인자녀' '신혼영유아']
 INDV_INCM_AMT : ['3천만원대' '1천만원대' '4천만원대' '2천만원대' '1천만미만' '5천만원대' '9천만원대' '8천만원대'
  '6천만원대' '1억이상']
-6.'MER_ADNG_NM', 'MER_ADNG_NO', 'MER_SUD_CD' 는 상점 위치와 관련된 열입니다.
-7.'CSTMR_ADNG_NM', 'CSTMR_ADNG_NO', 'CSTMR_SUD_CD' 는 고객의 거주지 위치와 관련된 열입니다.
-8.날짜를 기준으로 데이터를 분석할땐 그래프 출력 전에 날짜기준 그룹화를 진행한다.
-9.10번은 질문의 지역을 인식하여 전처리하는 Pandas code 예제이다.
-10.
+6. 아래는 대구 지역명 정보입니다. 
+MER_ADNG_NM : ['중구', '동구', '서구', '남구', '북구', '수성구', '달서구', '달성군', '군위군'] 
+7.'MER_ADNG_NM', 'MER_ADNG_NO', 'MER_SUD_CD' 는 상점 위치와 관련된 열입니다.
+8.'CSTMR_ADNG_NM', 'CSTMR_ADNG_NO', 'CSTMR_SUD_CD' 는 고객의 거주지 위치와 관련된 열입니다.
+9.날짜를 기준으로 데이터를 분석할땐 그래프 출력 전에 날짜기준 그룹화를 진행한다.시간대를 기준으로 데이터를 분석할땐 그래프 출력 전에 날짜 기준 그룹화를 진행한다.
+10.11번은 질문의 지역을 인식하여 전처리하는 Pandas code 예제이다.
+11.
 *example1
 Q: 서울에서 서양음식의 매출이 가장 높은 지역의 연령대별 매출 데이터를 알려줘.
 """
-# 서울의 서양음식 데이터 필터리
+# 서울의 서양음식 데이터 필터링
 filtered_df = df[(df['MER_SIDO_NM'] == '서울특별시')& (df['ALS_MER_TPBUZ_NM'] == '서양음식')]
 # 서울 내 각 지역별 서양음식 매출 집계
 sales_by_region = filtered_df.groupby('MER_CCG_NM')['SALE_AMT'].sum()
@@ -62,4 +64,4 @@ highest_sales_region = sales_by_region.idxmax()
 highest_sales_region_data = filtered_df[filtered_df['MER_CCG_NM'] == highest_sales_region]
 sales_by_age_group = highest_sales_region_data.groupby('AGE_10_CD')['SALE_AMT'].sum()
 """
-11.text에는 매출이 가장 높은 지역의 이름과 금액을 출력해라
+12.text에는 매출이 가장 높은 지역의 이름과 금액을 출력해라

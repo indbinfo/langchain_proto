@@ -44,9 +44,11 @@ AGE_10_CD : ['30대' '60대' '20대' '40대' '70대이상' '50대' '10대이하'
 LIFE_GB_CD : ['1인가구' '노인가구' '초중고자녀' '성인자녀' '신혼영유아']
 INDV_INCM_AMT : ['3천만원대' '1천만원대' '4천만원대' '2천만원대' '1천만미만' '5천만원대' '9천만원대' '8천만원대'
  '6천만원대' '1억이상']
-6.'MER_ADNG_NM', 'MER_ADNG_NO', 'MER_SUD_CD' 는 상점 위치와 관련된 열입니다.
-7.'CSTMR_ADNG_NM', 'CSTMR_ADNG_NO', 'CSTMR_SUD_CD' 는 고객의 거주지 위치와 관련된 열입니다.
-8. 이것은 질문의 지역을 인식하여 전처리하는 Pandas code 예제이다.
+6. 아래는 금천구 지역명 정보입니다. 
+MER_ADNG_NM : ['가산동', '독산1동', '독산3동', '시흥2동', '시흥5동', '독산2동', '시흥1동', '시흥4동', '독산4동']
+7.'MER_ADNG_NM', 'MER_ADNG_NO', 'MER_SUD_CD' 는 상점 위치와 관련된 열입니다.
+8.'CSTMR_ADNG_NM', 'CSTMR_ADNG_NO', 'CSTMR_SUD_CD' 는 고객의 거주지 위치와 관련된 열입니다.
+9. 이것은 질문의 지역을 인식하여 전처리하는 Pandas code 예제이다.
 *example1
 Q:양덕동 서양음식의 평균 매출을 알려줘
 Return: df = df['MER_ADNG_NM'.str.startswith('양덕')]

@@ -6,7 +6,7 @@ import numpy as np
 import json
 
 # config
-with open('/home/llm/langchain_proto/web_main/config/qdrant.json', 'r', encoding='utf8') as f:
+with open('/home/llm/main/llm/config/qdrant.json', 'r', encoding='utf8') as f:
     config = json.load(f)
 
 QDRANT_HOST = config['QDRANT_HOST']
@@ -16,6 +16,8 @@ client = QdrantClient(
     QDRANT_HOST,
     api_key=QDRANT_API_KEY
 )
+
+context_path = '/home/llm/main/llm/context/'
 
 class VectorDB:
     def __init__(self, client, collection_name, size=768):
@@ -62,14 +64,19 @@ if __name__ == "__main__":
 
     vectordb.create_collection()
 
-    # 유·무효질문
-    with open('/home/llm/langchain_proto/vec/questions.json', 'r', encoding='utf8') as f:
-        questions = json.load(f)
+    with open(context_path + "valid.txt", 'rt', encoding='UTF8') as f:
+        valid = f.read()
 
-    meta_1=list(np.repeat({"filter":"무효질문"},len(questions['무효질문'])))
-    meta_2=list(np.repeat({"filter":"유효질문"},len(questions['유효질문'])))
+    with open(context_path + 'invalid.txt', 'rt', encoding='UTF8') as f:
+        invalid = f.read()
 
-    question_list = questions['무효질문'] + questions['유효질문']
+    valid_list = valid.split('\n')
+    invalid_list = invalid.split('\n')
+
+    meta_1=list(np.repeat({"filter":"무효질문"},len(invalid_list)))
+    meta_2=list(np.repeat({"filter":"유효질문"},len(valid_list)))
+
+    question_list = invalid_list + valid_list
     ids = list(range(len(meta_1) + len(meta_2)))
 
     # vectorstore 저장
@@ -83,11 +90,11 @@ if __name__ == "__main__":
     client.set_payload(
         collection_name=collection_name,
         payload={'filter': '무효질문'},
-        points=list(range(0,39))
+        points=list(range(0, len(invalid_list)))
     )
 
     client.set_payload(
         collection_name=collection_name,
         payload={'filter' : '유효질문'},
-        points=list(range(39,94))
+        points=list(range(len(invalid_list), len(invalid_list + valid_list)))
     )

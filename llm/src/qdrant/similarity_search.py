@@ -78,9 +78,7 @@ class QAResponse:
                 valid_yn = False
                 break
         if valid_yn == False:
-            return "요청 주신 질문에 대해서 답변이 어렵습니다."
-        else:
-            return "답변 제공"
+            return "요청 주신 질문에 대해서 답변이 어렵습니다"
     
     def qdrant_similarity_search(self, k, score_threshold, filter):
         vectordb = Qdrant(
@@ -100,7 +98,7 @@ class QAResponse:
 
 config = {
     'model_id' : 'wizardcoder:34b-python',
-    'collection_name' : 'context_ys',
+    'collection_name' : 'context',
     'client' : client,
     'task' : sys.argv[1]
     }
@@ -112,7 +110,10 @@ result_k1 = qa_response.qdrant_similarity_search(
     score_threshold=0,
     filter=None
 )
-
+# for result in result_k1:
+#     document, score = result
+#     print('{0}'.format(document.metadata['filter']))
+#     print(document.page_content)    
 document, score = result_k1[0]
 filter_value = document.metadata['filter']
 print(filter_value)

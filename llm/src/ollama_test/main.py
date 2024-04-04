@@ -71,7 +71,7 @@ async def main_ui():
     with open(result_path + 'result_20240324145108.txt', 'r', encoding='utf-8') as f:
         code_return = f.read()
     
-    init_page(root_dir)   
+    init_page(root_dir)
     
     with st.form('question_answer'):
         user_question = st.text_area("질문을 입력하세요:", key="user_question", label_visibility='visible')
@@ -85,16 +85,18 @@ async def main_ui():
             """):
             if st.form_submit_button(label='검색하기'):
                 if user_question:
-                    with st.spinner('실행중입니다..'):
-                        response = get_response(code_return, user_question, 'wizardcoder:34b-python')
-                        words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
-                        await simulate_typing_effect(words, typing_speed=0.1)  # 비동기 함수 호출
-                        st.image(root_dir + 'result/corp_rate.png', use_column_width=True)
-                        st.write_stream(response)
+                    if 'last_question' not in st.session_state or st.session_state['last_question'] != user_question:
+                        st.session_state['last_question'] = user_question                    
+                        with st.spinner('실행중입니다..'):
+                            response = get_response(code_return, user_question, 'wizardcoder:34b-python')
+                            words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
+                            await simulate_typing_effect(words, typing_speed=0.1)  # 비동기 함수 호출
+                            st.image(root_dir + 'result/corp_rate.png', use_column_width=True)
+                            st.write_stream(response)
 
-                        st.markdown("""<table class="info-table" ... </table><br>
-                        """, unsafe_allow_html=True
-                        )
+                            st.markdown("""<table class="info-table" ... </table><br>
+                            """, unsafe_allow_html=True
+                            )
                        
 if __name__ == "__main__":
     asyncio.run(main_ui())

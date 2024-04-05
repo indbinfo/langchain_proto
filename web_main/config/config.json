@@ -7,7 +7,7 @@
 	"csv_path":"csv",
 	"csv_file":"data.csv",
 	"report_path":"text",
-	"report_file":"{}_report.txt",
+	"report_file":"{}_text.txt",
 	"code_file":"{}_code.py",
 	"graph_file":"{}_graph.png",
 	"logger_path":"/home/prompt_eng/langchain/langchain_proto/web_main/log"

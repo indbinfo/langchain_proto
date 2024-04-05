@@ -21,8 +21,10 @@ nest_asyncio.apply()
 config_path = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
 with open(config_path) as f:
     config = json.load(f)
-logger_path = config["path"]["logger_path"]
-logger = setup_logger(logger_path,"main.log")
+with open('/home/prompt_eng/langchain/langchain_proto/web_main/config/logging.json','r') as f:
+    lc = json.load(f)
+    logging.config.dictConfig(lc)
+logger = logging.getLogger("main")
 file_idx = datetime.now().strftime("%m%d_%H:%M")
 root_path = config['path']['root_path']
 save_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"])
@@ -30,13 +32,16 @@ save_dir = os.path.join(config["path"]["root_path"],config["path"]["result_path"
 # code_path = os.path.join(save_dir,config["path"]["code_path"],code_file)
 logo_file = os.path.join(root_path, 'bccard_logo.png')
 
-loading_txt = "AI가 분석에 맞는 코드를 생성중입니다. 분석을 하는동안 잠시만 기다려주세요"
+loading_txt = "AI가 분석에 맞는 코드를 생성중입니다. 분석을 하는 동안 잠시만 기다려주세요."
 dt_desc_txt = """
             해당 그래프는 BC 카드의 내국인 소비 데이터를 기반으로 생성하였습니다.
             내국인 소비 데이터는 일자/시간/연령대별 전국의 가맹점 소비 내역을 포함하고 있습니다.
-            자세한 사항은 위의 아래 링크를 참고해주세요"""
+            자세한 사항은 아래 데이터 상품을 참고해주세요."""
 
-async def simulate_typing_effect(text, typing_speed=.1):
+success_txt = "모델이 성공적으로 결과를 생성하였습니다."
+fail_txt = "파일 실행에 실패하였습니다."
+
+async def simulate_typing_effect(text, typing_speed=.08):
     words = [word for word in text]
     placeholder = st.empty()
     output_text = " "
@@ -56,7 +61,7 @@ def get_image(image_path):
 
 def init_page():
     st.set_page_config(
-        page_title='BC카드 PoC', 
+        page_title='BC카드 금융빅데이터 플랫폼 검색엔진', 
         page_icon= logo_file
 		)
     
@@ -64,20 +69,9 @@ def init_page():
 
     st.markdown(f"""
     <img src="data:image/png;base64,{image_base64}" alt="Local Image" style="width: 50px; height: auto;"> 
-    <span style="margin-left: 10px; font-size: 30px; font-weight: bold;">BC카드 PoC</span>
+    <span style="margin-left: 10px; font-size: 30px; font-weight: bold;">BC카드 금융빅데이터 플랫폼</span>
     <br><br>
     """, unsafe_allow_html=True)
-
-def create_prompt(code_return, user_question):
-    template = f"""
-    Translate the below text in Korean.
-    User question: {user_question}
-    Code return: {code_return}
-    """
-    return PromptTemplate.from_template(template)
-
-def get_model(model_id):
-    return Ollama(model=model_id)
 
 
 async def main_ui():
@@ -98,28 +92,26 @@ async def main_ui():
                 if 'last_question' not in st.session_state or st.session_state.last_question != user_question:
                     st.session_state.last_question = user_question
                     # response = get_response(code_return, user_question, 'wizardcoder:34b-python')
-                    with st.spinner('AI가 답변을 생성중입니다.. 잠시만 기다려주세요'):
+                    with st.spinner('AI가 답변을 생성중입니다..'):
                         await simulate_typing_effect(loading_txt, typing_speed=0.1)
-                        try:
-                            response, graph_path, report_path = response_from_llm(user_question)
-                            total_time = time.time() - start_time
-                            
-                        except Exception as e:
-                            st.write("모델이 질문에 답변하지 못하였습니다.")
-                            st.write(e)
-                    
+                        response, graph_path, report_path = response_from_llm(user_question)
+                        total_time = time.time() - start_time
+                        logger.info(f"소요 시간[모델 가동 X]:{total_time}")
+                        logger.info(f"response 결과:{response}")
+                                            
                     await simulate_typing_effect(response)
-                    # st.image(logo_file, use_column_width=True)
-                    if not response:
-                        st.write("요청 주신 질문에 대해서 답변이 어렵습니다")
-                    else:
+                    if response == success_txt:
+                        # st.image(logo_file, use_column_width=True)
                         st.image(graph_path, use_column_width=True)
                         with open(report_path, 'r') as f:
                             report = f.read()
                         await simulate_typing_effect(report)
-                        logger.info(f"소요 시간:{total_time}")
+                        total_time = time.time() - start_time
+                        logger.info(f"소요 시간[모델 가동 O]:{total_time}")
                         await simulate_typing_effect(dt_desc_txt, typing_speed=0.1)
                         st.markdown("""<table class="info-table" style="margin-left: auto; margin-right: auto;">
+                                <br>
+                                </br>
                                 <tr>
                                     <th>제공기관</th>
                                     <th>설명</th>
@@ -135,6 +127,8 @@ async def main_ui():
                                 </table><br>
                         """, unsafe_allow_html=True
                         )
+                    elif response == fail_txt:
+                        st.write("결과 호출에 실패하였습니다. 죄송합니다")
                         # words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
                         # simulate_typing_effect(words, typing_speed=0.1)
 

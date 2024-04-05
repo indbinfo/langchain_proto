@@ -29,7 +29,7 @@ class OllamaModelLoader:
         model = Ollama(model=self.model_id,
 			temperature=self.temperature,
 			repeat_penalty=self.repeat_penalty,
-            keep_alive=1
+            # keep_alive=1
 			)
         return model
 

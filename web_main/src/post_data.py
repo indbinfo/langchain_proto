@@ -1,17 +1,38 @@
+"""
+* Version: 1.0
+* 파일명: post_data.py
+* 설명: 주어진 텍스트 데이터를 Qdrant에 벡터로 저장하는 모듈
+* 수정일자: 2024/05/07
+* 수정자: 손예선
+* 수정 내용
+    1. 환경에 따라 경로 설정
+"""
 import os
 import json
 import numpy as np
 from preprocess.qdrant import VectorDB
-config_path = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
-with open (config_path) as f:
+
+# 운영 체제에 따라 경로 설정
+if os.name == 'posix':
+    PATH = os.path.join(
+        os.environ.get('HOME'),
+        'langchain_proto',
+        'web_main',
+    )
+elif os.name == 'nt':
+    PATH = os.path.join(
+       'c:', 
+       os.environ.get('HOMEPATH'),
+       "langchain_proto", 
+       "web_main",
+    )
+else:
+    PATH = None
+
+with open (os.path.join(PATH, 'config', 'config.json'), 'r', encoding='utf-8') as f:
     config = json.load(f)
-
-format_path = "/home/prompt_eng/langchain/langchain_proto/web_main/data/format"
-file_path = "format1.txt"
-
-with open(os.path.join(format_path, file_path),'r') as f:
-	context = f.read()
-
+with open(os.path.join('data', 'format', 'format1.txt'),'r', encoding='utf-8') as f:
+    context = f.read()
 print(context)
 
 qdrant = VectorDB()
@@ -25,17 +46,13 @@ ids=list(range(len(chunks)))
 print(meta_datas)
 print(ids)
 
-collection_name = "format"
-qdrant.create_collection(qd_client=db_client,collection_name=collection_name)
-qdrant.add_vectorstore(client= db_client,
-						text_chunks=chunks,
-						collection_name=collection_name,
-						ids = ids,
-						metadatas=meta_datas,
-                        payload_dict= payload_dict)
+COLLECTION_NAME = "format"
+qdrant.create_collection(qd_client=db_client, collection_name=COLLECTION_NAME)
 
-# db_client.set_payload(
-#     collection_name=collection_name,
-#     payload=payload_dict,
-#     points=ids
-# )
+qdrant.add_vectorstore(
+    client=db_client,
+    text_chunks=chunks,
+    collection_name=COLLECTION_NAME,
+    ids=ids,
+	metadatas=meta_datas,
+)

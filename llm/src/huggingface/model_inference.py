@@ -5,6 +5,7 @@ import torch
 import gpu_performance
 import load_model
 
+
 class ModelInference:
     def __init__(self, task, model_id, model_path, prompt_path, max_new_tokens, question):
         self.task = task
@@ -22,7 +23,7 @@ class ModelInference:
             model_id=self.model_id,
             model_path=self.model_path,
             )
-        
+
     # 프롬프트 로드
     def load_prompt(self):
         with open(self.prompt_path) as f:
@@ -43,7 +44,7 @@ class ModelInference:
             self.gpu_monitor_process.terminate()
             self.gpu_monitor_process.join()
             self.gpu_monitor_process = None
-        
+
     # 모델 추론 시간 측정 및 결과 도출
     def perform_inference(self):
         self.load_prompt()
@@ -55,10 +56,10 @@ class ModelInference:
         result = self.modelLoader.loadModel(
             prompt=self.prompt_template,
             max_new_tokens=self.max_new_tokens,
-            do_sample=True, # 다음에 올 토큰에 대한 확률분포에 따라 단어 샘플링하여 문장 완성
-            repetition_penalty=1.1, # 중복된 결과값 통제(>1)
+            do_sample=True,  # 다음에 올 토큰에 대한 확률분포에 따라 단어 샘플링하여 문장 완성
+            repetition_penalty=1.1,  # 중복된 결과값 통제(>1)
             top_k=1,
-        ).invoke({'question' : self.question})
+        ).invoke({'question': self.question})
 
         end_event.record()
         torch.cuda.synchronize()
@@ -66,7 +67,7 @@ class ModelInference:
         print(f'Inference Time: {inference_time} sec')
 
         return inference_time, result
-    
+
     # 실행
     def run(self, gpu_output_file, result_output_file):
         self.start_gpu_monitoring(gpu_output_file)
@@ -74,7 +75,7 @@ class ModelInference:
         inference_time, result = self.perform_inference()
         self.stop_gpu_monitoring()
 
-        with open(result_output_file, 'w', encoding='utf-8') as f:
+        with open(result_output_file, 'w', encoding='utf-8') as f:  # 예외처리
             f.write('{0} {1} sec\n{2}'.format(self.model_id, inference_time, result))
 
         print(result.split('end')[0])

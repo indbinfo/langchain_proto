@@ -2,6 +2,7 @@ import subprocess
 import time
 import re
 
+
 class GpuPerformance:
     def record_gpu_performance(self, model_id, output, interval_sec):
         try:
@@ -15,7 +16,7 @@ class GpuPerformance:
                     f.write(f"[{now}]: {model_id} {memory_usage}\n")
                     f.flush()
                     time.sleep(interval_sec)
-                    
+
         finally:
             print('file closed.')
             f.close()

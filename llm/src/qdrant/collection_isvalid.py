@@ -6,9 +6,7 @@ import numpy as np
 import json
 
 # config
-with open('/home/llm/langchain_proto/web_main/config/qdrant.json',
-          'r',
-          encoding='utf8') as f:
+with open('/home/llm/langchain_proto/web_main/config/qdrant.json', 'r', encoding='utf8') as f:
     config = json.load(f)
 
 QDRANT_HOST = config['QDRANT_HOST']

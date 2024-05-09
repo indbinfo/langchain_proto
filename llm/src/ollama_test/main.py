@@ -23,8 +23,7 @@ async def simulate_typing_effect(words, typing_speed=.1):
             await asyncio.sleep(typing_speed)  # 비동기적으로 대기합니다.
 
         output_text += ' '
-        placeholder.markdown(font_style + output_text + "</span>",
-                             unsafe_allow_html=True)
+        placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
 
 
 def load_config():

@@ -15,16 +15,13 @@ from preprocess.save_file import save_execute_python
 CONFIG_PATH = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
 
 with open(
-    "/home/prompt_eng/langchain/langchain_proto/web_main/config/logging.json",
+    "/home/prompt_eng/langchain/langchain_proto/web_main/config/log/logging.json",
     "r",
     encoding="utf-8",
 ) as f:
     lc = json.load(f)
     logging.config.dictConfig(lc)
 logger = logging.getLogger("main")
-
-# FILE_IDX = datetime.now().strftime("%M")
-# FILE_IDX = 1
 
 with open(CONFIG_PATH, encoding="utf-8") as f:
     config = json.load(f)

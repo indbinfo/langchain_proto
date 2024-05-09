@@ -4,6 +4,7 @@ import numpy as np
 from preprocess.qdrant import VectorDB
 
 CONFIG_PATH = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
+
 with open(CONFIG_PATH, encoding="utf-8") as f:
     config = json.load(f)
 

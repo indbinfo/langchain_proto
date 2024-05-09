@@ -1,11 +1,9 @@
 {
     "path" : {
-            "root_dir" : "/home/llm/main/llm",
             "prompt_path" : "/opt/sample_prompt/",
-            "result_path" : "/data/result",
-            "log_path" : "/log/dir",
-            "context_path" : "/context/context",
-            "config_path":"/config"
+            "result_path" : "result/",
+            "log_path" : "log/",
+            "context_path" : "context/"
     },
     "ollama_model" : {
         "mistral" : {

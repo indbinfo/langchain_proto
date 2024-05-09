@@ -2,7 +2,7 @@
     "path" : {
             "root_dir" : "/home/llm/main/llm",
             "prompt_path" : "/opt/sample_prompt/",
-            "result_path" : "/result",
+            "result_path" : "/data/result",
             "log_path" : "/log/dir",
             "context_path" : "/context",
             "config_path":"/config"

@@ -32,7 +32,7 @@ class ModelInference:
             template_text = f.read()
         self.prompt_template = PromptTemplate.from_template(template_text)
     # method 안에 함수를 넣지 않기
-    def _monitor_gpu_performance(model_id, output_file, interval_sec):
+    def _monitor_gpu_performances(model_id, output_file, interval_sec):
         collector = MetricsCollector()
         # argument간 간격은 한칸씩 띄어주기
         collector.record_gpu_performance(model_id, output_file, interval_sec)

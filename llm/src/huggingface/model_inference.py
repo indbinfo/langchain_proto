@@ -75,7 +75,7 @@ class ModelInference:
         inference_time, result = self.perform_inference()
         self.stop_gpu_monitoring()
 
-        with open(result_output_file, 'w', encoding='utf-8') as f:
+        with open(result_output_file, 'w', encoding='utf-8') as f:  # 예외처리
             f.write('{0} {1} sec\n{2}'.format(self.model_id, inference_time, result))
 
         print(result.split('end')[0])

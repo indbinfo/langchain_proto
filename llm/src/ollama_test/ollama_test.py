@@ -4,10 +4,10 @@ import torch
 import json
 import time
 
-root_dir = '/home/llm/main/llm/'
+config_path = '/home/llm/main/llm/config/config.json'
 
 def config(root_dir):
-    with open(root_dir + 'config/config.json') as f:
+    with open(config_path) as f:
         config = json.load(f)
 
     model_path = config['path']['model_path']

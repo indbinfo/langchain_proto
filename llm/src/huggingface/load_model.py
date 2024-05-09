@@ -9,8 +9,8 @@ class ModelLoader:
         self.task = task
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, cache_dir=model_path, device_map='auto')
         self.model = AutoModelForCausalLM.from_pretrained(model_id, cache_dir=model_path, device_map='auto')
-    # method명은 snake case를 사용하고 함수 목적에 더 가깝게 명명한다.
-    def create_chain(self, prompt, max_new_tokens, repetition_penalty, top_k, do_sample=False):
+    
+    def loadModel(self, prompt, max_new_tokens, repetition_penalty, top_k, do_sample=False):
         pipe = pipeline(
             task=self.task,
             model=self.model,
@@ -21,6 +21,7 @@ class ModelLoader:
             top_k=top_k,
             device_map='auto'
         )
+    
         hf = HuggingFacePipeline(pipeline=pipe)
         chain = prompt | hf | StrOutputParser()
 

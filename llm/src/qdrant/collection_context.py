@@ -1,5 +1,3 @@
-import json
-import sys
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Qdrant
@@ -7,27 +5,28 @@ from qdrant_client import QdrantClient
 import qdrant_client
 import numpy as np
 import tiktoken
+import json
+import sys
 
-
-config_path = '/home/llm/main/llm/config/config.json'
+home_dir = '/home/llm/main/llm/'
+config_path = home_dir + 'config/config.json'
 
 # config
 with open(config_path, 'r', encoding='utf8') as f:
     config = json.load(f)
 
-root_path = config_path['path']['root_dir']
-# 계층 구조가 있는 디렉토리를 어떻게 표현하는게 가장 깔끔할까요..?
-context_path = os.path.join(root_path, config['path']['context_path'])
+context_path = home_dir + config['path']['context_path']
+
 # qdrant config
-with open(os.path.join(root_path, config_path['path']['config_path']), 'qdrant.json', 'r', encoding='utf8') as f:
+with open(home_dir + 'config/qdrant.json', 'r', encoding='utf8') as f:
     qdrant = json.load(f)
-# 변수명은 소문자로 작성
-qdrant_host = qdrant['QDRANT_HOST']
-qdrant_api_key = qdrant['QDRANT_API_KEY']
+
+QDRANT_HOST = qdrant['QDRANT_HOST']
+QDRANT_API_KEY = qdrant['QDRANT_API_KEY']
 
 client = QdrantClient(
-    qdrant_host,
-    api_key=qdrant_api_key
+    QDRANT_HOST,
+    api_key=QDRANT_API_KEY
 )
 
 class VectorDB:
@@ -66,7 +65,7 @@ class VectorDB:
         vectorstore.add_texts(text_chunks,
                              ids=ids,
                              metadatas=metadatas
-        )
+                             )
         return vectorstore
     
     def tiktoken_len(self, text):

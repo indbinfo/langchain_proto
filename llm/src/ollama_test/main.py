@@ -1,20 +1,16 @@
-# built-in 라이브러리 > 써드파티 라이브러리 > 로컬 라이브러리 순 
-import base64
-import json
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_community.llms import Ollama
 from streamlit_extras.stylable_container import stylable_container
 import streamlit as st
+import base64
+import json
 import asyncio
 import nest_asyncio
-# config path를 아예 환경변수로 빼는게 더 나을것 같기도 하네요..
-config_path = '/home/llm/main/llm/config/config.json'
 
 nest_asyncio.apply()
 
-# font_style 적용하는 함수 밖으로 빼기
-async def _simulate_typing_effect(words, typing_speed=.1):
+async def simulate_typing_effect(words, typing_speed=.1):
     placeholder = st.empty()
     output_text = " "
     font_style = "<span style='font-family: nanum;'>"
@@ -28,8 +24,7 @@ async def _simulate_typing_effect(words, typing_speed=.1):
         placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
 
 def load_config():
-    # config path는 상단에서 호출
-    with open(config_path, 'r') as f:
+    with open('/home/llm/main/llm/config/config.json', 'r') as f:
         return json.load(f)
     
 def get_image(image_path):
@@ -37,13 +32,11 @@ def get_image(image_path):
         return base64.b64encode(img_file.read()).decode('utf-8')
 
 def init_page(root_dir):
-    # 이런 path의 경로를 어디다 놓는게 최선일지..
-    page_icon = '/home/llm/main/llm/src/ollama_test/bccard_logo.png'
     st.set_page_config(
-        page_title='BC카드 PoC',
-        page_icon=page_icon)
+        page_title='BC카드 PoC', 
+        page_icon='/home/llm/main/llm/src/ollama_test/bccard_logo.png')
     
-    image_base64 = get_image(page_icon)
+    image_base64 = get_image('/home/llm/main/llm/src/ollama_test/bccard_logo.png')
 
     st.markdown(f"""
     <img src="data:image/png;base64,{image_base64}" alt="Local Image" style="width: 50px; height: auto;"> 
@@ -71,10 +64,10 @@ def get_response(code_return, user_question, model_id):
 
 async def main_ui():
     config = load_config()
-    root_dir = config['root_dir']
-    result_path = os.path.join(root_dir,config['path']['result_path'])
-    file_nm = 'result_20240324145108.txt'
-    with open(os.path.join(result_path,file_nm) , 'r', encoding='utf-8') as f:
+    root_dir = '/home/llm/main/llm/'
+    result_path = root_dir + config['path']['result_path']
+
+    with open(result_path + 'result_20240324145108.txt', 'r', encoding='utf-8') as f:
         code_return = f.read()
     
     init_page(root_dir)   
@@ -94,8 +87,8 @@ async def main_ui():
                     with st.spinner('실행중입니다..'):
                         response = get_response(code_return, user_question, 'wizardcoder:34b-python')
                         words = ["Hello,", "this", "is", "a", "simulation", "of", "ChatGPT", "typing."]
-                        await _simulate_typing_effect(words, typing_speed=0.1)  # 비동기 함수 호출
-                        st.image(os.path.join(root_dir , config['result_path'], 'corp_rate.png'), use_column_width=True)
+                        await simulate_typing_effect(words, typing_speed=0.1)  # 비동기 함수 호출
+                        st.image(root_dir + 'result/corp_rate.png', use_column_width=True)
                         st.write_stream(response)
 
                         st.markdown("""<table class="info-table" ... </table><br>

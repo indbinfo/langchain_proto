@@ -1,9 +1,9 @@
 import subprocess
 import time
 import re
-# class명을 좀 더 일반적인 목적으로 변경
-class MetricsCollector:
-    def record_gpu_memory(self, model_id, output, interval_sec):
+
+class GpuPerformance:
+    def record_gpu_performance(self, model_id, output, interval_sec):
         try:
             with open(output, 'w') as f:
                 while True:

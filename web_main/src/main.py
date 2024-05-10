@@ -57,16 +57,6 @@ report_dir = os.path.join(
     )
 
 def response_from_llm(user_prompt, file_idx = 1):
-    """
-    유저 프롬프트를 입력 받아 코드를 생성하고 실행한 후 결과를 반환
-
-    Args:
-        user_prompt (str): 사용자가 입력한 프롬프트
-        file_idx (int, optional): 결과를 저장할 파일의 인덱스. default=1
-    
-    Returns:
-        tuple: 코드 실행 결과, 그래프 파일 경로, 리포트 파일 경로로 구성된 튜플 반환
-    """
     code_file = config["path"]["code_file"].format(file_idx)
     code_path = os.path.join(save_dir,code_file)
     report_file = config["path"]["report_file"].format(file_idx)
@@ -97,7 +87,7 @@ def response_from_llm(user_prompt, file_idx = 1):
         client = qd_client,
         task = user_prompt,
         collection_name = "question",
-        filters=None,
+        filter=None,
         k=5
     )
 
@@ -161,10 +151,7 @@ def response_from_llm(user_prompt, file_idx = 1):
     #     {"context": retriever| format_docs, "task": RunnablePassthrough()})
 
     # chain = setup_and_retrieval | partial_prompt | code_gen_mdl | StrOutputParser()
-                                        graph_file=graph_file,
-                                        report_file=report_file,
-                                        context = context
-                                        )
+
     chain = partial_prompt | code_gen_mdl | StrOutputParser()
     code_txt = chain.invoke({"task": user_prompt})
     logger.info("코드 결과:\n %s", code_txt)

@@ -36,7 +36,7 @@ def load_template(template_file, input_variables):
     Returns:
         PromptTemplate: 불러온 템플릿과 입력 변수로 초기화된 PromptTemplate 클래스의 인스턴스를 반환한다.
     """
-    with open(os.path.join(TEMPLATE_PATH, template_file), encoding="utf-8") as f:
+    with open(os.path.join(PATH, template_file), encoding="utf-8") as f:
         template = f.read()
     prompt = PromptTemplate(template=template, input_variables=input_variables)
 

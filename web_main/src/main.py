@@ -88,7 +88,7 @@ def response_from_llm(user_prompt, file_idx = 1):
         task = user_prompt,
         collection_name = "question",
         filter=None,
-        k=5
+        k=1
     )
 
     # 기본값 설정

@@ -106,7 +106,6 @@ class QAResponse:
         # 검색강화
         qa = RetrievalQA.from_chain_type(
             llm=llm,
-            llm=llm,
             chain_type='stuff',
             retriever=vectordb.as_retriever(),
             return_source_documents=True,

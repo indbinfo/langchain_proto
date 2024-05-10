@@ -109,6 +109,7 @@ class ModelInference:
             repetition_penalty=1.1, # 중복된 결과값 통제(>1)
             top_k=1,
         ).invoke({'question': self.question})
+        ).invoke({'question': self.question})
 
         end_event.record()
         torch.cuda.synchronize()

@@ -56,8 +56,8 @@ class ModelLoader:
             device_map='auto'
         )
 
-        huggingface_pipeline = HuggingFacePipeline(pipeline=pipe)
-        output_chain = prompt | huggingface_pipeline | StrOutputParser()
+        hf = HuggingFacePipeline(pipeline=pipe)
+        chain = prompt | hf | StrOutputParser()
 
         return output_chain
     

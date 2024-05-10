@@ -51,11 +51,11 @@ class QAResponse:
         """
         client = self.client
         cnt = client.count(
-            collection_name = self.collection_name,
-            exact = True,
+            collection_name=self.collection_name,
+            exact=True,
         )
         return cnt
-    
+
     def get_embedding(self):
         """
         임베딩 모델을 로드합니다.
@@ -66,13 +66,13 @@ class QAResponse:
             encode_kwargs={'normalize_embeddings': True}
         )
         return embeddings
-    
+
     def load_llm(self):
         """
         지정된 모델을 로드합니다.
         """
         return Ollama(model=self.model_id)
-    
+
     def get_filter(self, key, value):
         """
         검색 필터를 생성합니다.
@@ -88,12 +88,15 @@ class QAResponse:
             ]
         )
         return filter
-    
+
     def qdrant_qa_response(self):
         """
         질문에 대한 응답을 검색 및 생성합니다.
         """
         vectordb = Qdrant(
+            client=self.client,
+            collection_name=self.collection_name,
+            embeddings=self.get_embedding()
             client=self.client,
             collection_name=self.collection_name,
             embeddings=self.get_embedding()
@@ -103,12 +106,13 @@ class QAResponse:
         # 검색강화
         qa = RetrievalQA.from_chain_type(
             llm=llm,
+            llm=llm,
             chain_type='stuff',
             retriever=vectordb.as_retriever(),
             return_source_documents=True,
         )
 
-        response = qa.invoke({'query' : self.task})
+        response = qa.invoke({'query': self.task})
         return response
     
     def is_valid(self, result):
@@ -124,11 +128,11 @@ class QAResponse:
             if valid_filter == "무효질문":
                 valid_yn = False
                 break
-        if valid_yn == False:
+        if valid_yn is False:
             return "요청 주신 질문에 대해서 답변이 어렵습니다."
         else:
             return "답변 제공"
-    
+
     def qdrant_similarity_search(self, k, score_threshold, filter):
         """
         유사도 검색을 수행합니다.
@@ -143,15 +147,16 @@ class QAResponse:
             collection_name=self.collection_name,
             embeddings=self.get_embedding()
             )
-        
+
         search_result = vectordb.similarity_search_with_score(
-            query=self.task, 
+            query=self.task,
             k=k,
-            score_threshold =score_threshold, 
+            score_threshold=score_threshold,
             filter=filter
             )
-        
+
         return search_result
+
 
 config = {
     'model_id': 'wizardcoder:34b-python',
@@ -164,7 +169,7 @@ qa_response = QAResponse(**config)
 
 # 첫 번째 유사도 검색 실행
 result_k1 = qa_response.qdrant_similarity_search(
-    k=1, 
+    k=1,
     score_threshold=0,
     filter=None
 )
@@ -178,7 +183,7 @@ search_result = qa_response.qdrant_similarity_search(
     score_threshold=0,
     k=100,
     filter=qa_response.get_filter(
-        key='filter', 
+        key='filter',
         value=filter_value
         ),
     )

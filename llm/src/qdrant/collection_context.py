@@ -29,12 +29,13 @@ client = QdrantClient(
     api_key=QDRANT_API_KEY
 )
 
+
 class VectorDB:
     def __init__(self, client, collection_name, size=768):
         self.client = client
         self.collection_name = collection_name
-        self.size=size
-    
+        self.size = size
+
     # get embedding model
     def get_embedding(self):
         embeddings = HuggingFaceEmbeddings(
@@ -43,7 +44,7 @@ class VectorDB:
             encode_kwargs={'normalize_embeddings': True}
         )
         return embeddings
-    
+
     # create collection
     def create_collection(self):
         collection_config = qdrant_client.http.models.VectorParams(
@@ -52,22 +53,19 @@ class VectorDB:
         )
 
         client.recreate_collection(
-            collection_name = self.collection_name,
-            vectors_config = collection_config
+            collection_name=self.collection_name,
+            vectors_config=collection_config
         )
 
     def add_vectorstore(self, text_chunks, ids, metadatas):
         vectorstore = Qdrant(
-            client = self.client,
-            collection_name = self.collection_name,
-            embeddings = self.get_embedding()
+            client=self.client,
+            collection_name=self.collection_name,
+            embeddings=self.get_embedding()
         )
-        vectorstore.add_texts(text_chunks,
-                             ids=ids,
-                             metadatas=metadatas
-                             )
+        vectorstore.add_texts(text_chunks, ids=ids, metadatas=metadatas)
         return vectorstore
-    
+
     def tiktoken_len(self, text):
         tokenizer = tiktoken.get_encoding("cl100k_base")
         tokens = tokenizer.encode(text)
@@ -82,9 +80,12 @@ class VectorDB:
         chunks = text_splitter.split_text(text)
         return chunks
 
+
 if __name__ == "__main__":
     collection_name = sys.argv[1]
-    vectordb = VectorDB(collection_name=collection_name, size=768, client=client)
+    vectordb = VectorDB(collection_name=collection_name,
+                        size=768,
+                        client=client)
 
     vectordb.create_collection()
 
@@ -112,52 +113,54 @@ if __name__ == "__main__":
     chunks_4 = vectordb.get_chunks(prompt_4)
     chunks_5 = vectordb.get_chunks(prompt_5)
     chunks_6 = vectordb.get_chunks(prompt_6)
-    chunck_list = sum([chunks_1,chunks_2, chunks_3, chunks_4, chunks_5, chunks_6],[] )
-    
-    meta_1 = list(np.repeat({"filter":"prompt_1"},len(chunks_1)))
-    meta_2 = list(np.repeat({"filter":"prompt_2"},len(chunks_2)))
-    meta_3 = list(np.repeat({"filter":"prompt_3"},len(chunks_3)))
-    meta_4 = list(np.repeat({"filter":"prompt_4"},len(chunks_4)))
-    meta_5 = list(np.repeat({"filter":"prompt_5"},len(chunks_5)))
-    meta_6 = list(np.repeat({"filter":"prompt_6"},len(chunks_6)))
+    chunck_list = sum([chunks_1, chunks_2, chunks_3, chunks_4, chunks_5, chunks_6], [] )
+
+    meta_1 = list(np.repeat({"filter": "prompt_1"}, len(chunks_1)))
+    meta_2 = list(np.repeat({"filter": "prompt_2"}, len(chunks_2)))
+    meta_3 = list(np.repeat({"filter": "prompt_3"}, len(chunks_3)))
+    meta_4 = list(np.repeat({"filter": "prompt_4"}, len(chunks_4)))
+    meta_5 = list(np.repeat({"filter": "prompt_5"}, len(chunks_5)))
+    meta_6 = list(np.repeat({"filter": "prompt_6"}, len(chunks_6)))
 
     vectordb.add_vectorstore(
-    text_chunks=chunck_list ,
-    ids = list(range(len(chunck_list))),
-    metadatas=sum([meta_1, meta_2, meta_3, meta_4, meta_5, meta_6], [])
-)
+        text_chunks=chunck_list,
+        ids=list(range(len(chunck_list))),
+        metadatas=sum([meta_1, meta_2, meta_3, meta_4, meta_5, meta_6], []))
     client.set_payload(
-    collection_name=collection_name,
-    payload={'filter': 'prompt_1'},
-    points=list(range(0,len(chunks_1)))
+        collection_name=collection_name,
+        payload={'filter': 'prompt_1'},
+        points=list(range(0, len(chunks_1))))
+
+    client.set_payload(
+        collection_name=collection_name,
+        payload={'filter': 'prompt_2'},
+        points=list(range(len(chunks_1), len(chunks_1 + chunks_2)))
     )
 
     client.set_payload(
-    collection_name=collection_name,
-    payload={'filter': 'prompt_2'},
-    points=list(range(len(chunks_1), len(chunks_1 + chunks_2)))
+        collection_name=collection_name,
+        payload={'filter': 'prompt_3'},
+        points=list(range(len(chunks_1 + chunks_2),
+                          len(chunks_1 + chunks_2 + chunks_3)))
     )
 
     client.set_payload(
-    collection_name=collection_name,
-    payload={'filter': 'prompt_3'},
-    points=list(range(len(chunks_1 + chunks_2), len(chunks_1 + chunks_2 + chunks_3)))
+        collection_name=collection_name,
+        payload={'filter': 'prompt_4'},
+        points=list(range(len(chunks_1 + chunks_2 + chunks_3),
+                          len(chunks_1 + chunks_2 + chunks_3 + chunks_4)))
     )
 
     client.set_payload(
-    collection_name=collection_name,
-    payload={'filter': 'prompt_4'},
-    points=list(range(len(chunks_1 + chunks_2 + chunks_3), len(chunks_1 + chunks_2 + chunks_3 + chunks_4)))
+        collection_name=collection_name,
+        payload={'filter': 'prompt_5'},
+        points=list(range(len(chunks_1 + chunks_2 + chunks_3 + chunks_4),
+                          len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5)))
     )
 
     client.set_payload(
-    collection_name=collection_name,
-    payload={'filter': 'prompt_5'},
-    points=list(range(len(chunks_1 + chunks_2 + chunks_3 + chunks_4), len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5)))
-    )
-
-    client.set_payload(
-    collection_name=collection_name,
-    payload={'filter': 'prompt_6'},
-    points=list(range(len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5), len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5 + chunks_6)))
+        collection_name=collection_name,
+        payload={'filter': 'prompt_6'},
+        points=list(range(len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5),
+                          len(chunks_1 + chunks_2 + chunks_3 + chunks_4 + chunks_5 + chunks_6)))
     )

@@ -6,6 +6,7 @@ import time
 
 root_dir = '/home/llm/main/llm/'
 
+
 def config(root_dir):
     with open(root_dir + 'config/config.json') as f:
         config = json.load(f)
@@ -15,14 +16,17 @@ def config(root_dir):
 
     return model_path, prompt_path
 
+
 def load_file(path, filename):
     with open(path + filename) as f:
         file = f.read()
     return file
 
+
 def load_model_list():
     model_list = [i['model'] for i in ollama.list()['models']]
     return model_list
+
 
 def inference(prompt, model, temperature):
     start_event = torch.cuda.Event(enable_timing=True)
@@ -37,6 +41,7 @@ def inference(prompt, model, temperature):
 
     inference_time = round(start_event.elapsed_time(end_event) / 1000, 3)
     return result, inference_time
+
 
 model_path, prompt_path = config(root_dir=root_dir)
 code = load_file(path=prompt_path, filename='code.txt')
@@ -53,4 +58,7 @@ datetime = time.strftime('%Y%m%d%H%M%S', time.localtime())
 output_file = root_dir + 'log/ollama_log.log'
 
 with open(output_file, 'a', encoding='utf-8') as f:
-            f.write('\n\n[{0} {1}] : {2} sec {3}'.format(datetime, model_id, inference_time, result))
+            f.write('\n\n[{0} {1}] : {2} sec {3}'.format(datetime,
+                                                         model_id,
+                                                         inference_time,
+                                                         result))

@@ -73,6 +73,9 @@ class VectorDB:
             client=self.client,
             collection_name=self.collection_name,
             embeddings=self.get_embedding()
+            client=self.client,
+            collection_name=self.collection_name,
+            embeddings=self.get_embedding()
         )
         vectorstore.add_texts(
             text_chunks,
@@ -80,6 +83,7 @@ class VectorDB:
             metadatas=metadatas
         )
         return vectorstore
+
 
 if __name__ == "__main__":
     collection_name = 'question'
@@ -107,20 +111,20 @@ if __name__ == "__main__":
 
     # vectorstore 저장 -> 질문 리스트 전체를 저장
     vec = vectordb.add_vectorstore(
-        text_chunks=question_list, 
-        ids=ids, 
-        metadatas=sum([meta_1,meta_2] , [])
+        text_chunks=question_list,
+        ids=ids,
+        metadatas=sum([meta_1, meta_2], [])
         )
 
     # payload 설정 -> 특정 데이터 포인트에 메타데이터를 추가
     client.set_payload(
         collection_name=collection_name,
         payload={'filter': '무효질문'},
-        points=list(range(0,39))
+        points=list(range(0, 39))
     )
 
     client.set_payload(
         collection_name=collection_name,
-        payload={'filter' : '유효질문'},
-        points=list(range(39,94))
+        payload={'filter': '유효질문'},
+        points=list(range(39, 94))
     )

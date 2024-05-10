@@ -28,17 +28,15 @@ else:
     PATH = None
 
 def load_template(template_file, input_variables):
-    """
-    기존 파일에서 Template 로드
-
+    """파일을 불러와 프롬프트 템플릿으로 로드한다.
     Args:
-        template_file (str): 템플릿 파일명
-        input_variables (dict): 템플릿에서 사용되는 변수들
+        template_file (str): 불러올 템플릿 파일
+        input_variables (dict): 템플릿에 들어갈 입력 변수
 
-    Returns: 
-        기존 파일에서 로드한 Prompt Template
+    Returns:
+        PromptTemplate: 불러온 템플릿과 입력 변수로 초기화된 PromptTemplate 클래스의 인스턴스를 반환한다.
     """
-    with open(os.path.join(PATH, 'data', 'template', template_file), encoding='utf-8') as f:
+    with open(os.path.join(TEMPLATE_PATH, template_file), encoding="utf-8") as f:
         template = f.read()
     prompt = PromptTemplate(template=template, input_variables=input_variables)
 

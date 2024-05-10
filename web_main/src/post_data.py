@@ -37,12 +37,12 @@ print(context)
 
 qdrant = VectorDB()
 db_client = qdrant.create_connection()
-chunks = qdrant.get_chunks(text = context)
+chunks = qdrant.get_chunks(text=context)
 
-payload_dict = {"filter":"format"}
+payload_dict = {"filter": "format"}
 
-meta_datas = list(np.repeat(payload_dict,len(chunks)))
-ids=list(range(len(chunks)))
+meta_datas = list(np.repeat(payload_dict, len(chunks)))
+ids = list(range(len(chunks)))
 print(meta_datas)
 print(ids)
 

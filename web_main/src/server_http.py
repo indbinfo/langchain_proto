@@ -80,7 +80,9 @@ async def simulate_typing_effect(text, typing_speed=.08):
     for word in words:
         for letter in word:
             output_text += letter
-            placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
+            placeholder.markdown(
+                font_style + output_text + "</span>", unsafe_allow_html=True
+            )
             await asyncio.sleep(typing_speed)  # 비동기적으로 대기합니다.
 
         placeholder.markdown(font_style + output_text + "</span>", unsafe_allow_html=True)
@@ -109,11 +111,14 @@ def init_page():
 
     image_base64 = get_image(logo_file)
 
-    st.markdown(f"""
-    <img src="data:image/png;base64,{image_base64}" alt="Local Image" style="width: 50px; height: auto;"> 
+    st.markdown(
+        f"""
+    <img src="data:image/png;base64,{image_base64}" alt="Local Image" style="width: 50px; height: auto;">
     <span style="margin-left: 10px; font-size: 30px; font-weight: bold;">BC카드 금융빅데이터 플랫폼</span>
     <br><br>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 async def main_ui():
     """
@@ -127,14 +132,15 @@ async def main_ui():
                                      label_visibility='visible'
                                      )
         with stylable_container(
-            'red',
+            "red",
             css_styles="""
             button {
                 background-color: #FF0000;
                 color: #F5F5F5
             }
-            """):
-            if st.form_submit_button(label='검색하기'):
+            """,
+        ):
+            if st.form_submit_button(label="검색하기"):
                 start_time = time.time()
                 if 'last_question' not in st.session_state or \
                     st.session_state.last_question != user_question:
@@ -148,37 +154,41 @@ async def main_ui():
                         logger.info("response 결과: %s", response)
 
                     await simulate_typing_effect(response)
-
                     if response == SUCCESS_TXT:
+                        # st.image(logo_file, use_column_width=True)
                         st.image(graph_path, use_column_width=True)
-
-                        with open(report_path, 'r', encoding='utf-8') as rp:
-                            report = rp.read()
+                        with open(report_path, "r", encoding="utf-8") as file:
+                            report = file.read()
                         await simulate_typing_effect(report)
                         total_time = time.time() - start_time
                         logger.info("소요 시간[모델 가동 O]: %s", total_time)
-                        await simulate_typing_effect(
-                            DT_DESC_TXT,
-                            typing_speed=0.1,
+                        await simulate_typing_effect(DT_DESC_TXT, typing_speed=0.1)
+                        st.markdown(
+                            """<table class="info-table" style="margin-left: auto; margin-right: auto;">
+                                <br>
+                                </br>
+                                <tr>
+                                    <th>제공기관</th>
+                                    <th>설명</th>
+                                    <th>가격</th>
+                                    <th>유관상품</th>
+                                </tr>
+                                <tr>
+                                    <td>비씨카드</td>
+                                    <td>내국인 카드소비데이터</td>
+                                    <td>3,000,000원</td>
+                                    <td><a href="https://www.bigdata-finance.kr/dataset/datasetView.do?datastId=SET0300009" style="font-weight: bold;">바로가기</a></td>
+                                </tr>
+                                </table><br>
+                        """,
+                            unsafe_allow_html=True,
                         )
-                        st.markdown("""<table class="info-table" style="margin-left: auto; margin-right: auto;">
-                                    <br></br>
-                                    <tr>
-                                        <th>제공기관</th>
-                                        <th>설명</th>
-                                        <th>가격</th>
-                                        <th>유관상품</th>
-                                    </tr>
-                                    <tr>
-                                        <td>비씨카드</td>
-                                        <td>내국인 카드소비데이터</td>
-                                        <td>3,000,000원</td>
-                                        <td><a href="https://www.bigdata-finance.kr/dataset/datasetView.do?datastId=SET0300009" style="font-weight: bold;">바로가기</a></td>
-                                    </tr>
-                                    </table><br>""", unsafe_allow_html=True
-                                    )
                     elif response == FAIL_TXT:
                         st.write("결과 호출에 실패하였습니다. 죄송합니다")
+                        # words = ["Hello,", "this", "is", "a",
+                        # "simulation", "of", "ChatGPT", "typing."]
+                        # simulate_typing_effect(words, typing_speed=0.1)
+
 
 if __name__ == "__main__":
     asyncio.run(main_ui())

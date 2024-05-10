@@ -11,6 +11,8 @@
 """
 import json
 import os
+
+# from custom_log import setup_logger
 import logging
 import logging.config
 
@@ -20,26 +22,14 @@ from preprocess.load_data import load_template
 from preprocess.qdrant import VectorDB, get_filter
 from preprocess.save_file import save_execute_python
 
-# 운영 체제에 따라 Config 경로 설정
-if os.name == 'posix':
-    CONFIG_PATH = os.path.join(
-        os.environ.get('HOME'),
-        'langchain_proto',
-        'web_main',
-        'config',
-    )
-elif os.name == 'nt':
-    CONFIG_PATH = os.path.join(
-       'C:', 
-       os.environ.get('HOMEPATH'),
-       "langchain_proto", 
-       "web_main", 
-       "config",
-    )
-else:
-    CONFIG_PATH = None
 
-with open(os.path.join(CONFIG_PATH, 'logging.json'),'r', encoding='utf-8') as f:
+CONFIG_PATH = "/home/prompt_eng/langchain/langchain_proto/web_main/config/config.json"
+
+with open(
+    "/home/prompt_eng/langchain/langchain_proto/web_main/config/log/logging.json",
+    "r",
+    encoding="utf-8",
+) as f:
     lc = json.load(f)
     logging.config.dictConfig(lc)
 logger = logging.getLogger("main")
@@ -81,8 +71,9 @@ def response_from_llm(user_prompt, file_idx = 1):
     code_path = os.path.join(save_dir,code_file)
     report_file = config["path"]["report_file"].format(file_idx)
     report_path = os.path.join(report_dir, report_file)
-    graph_file = config["path"]["graph_file"].format(file_idx)
+    graph_file = config["path"]["graph_file"].format(FILE_IDX)
     graph_path = os.path.join(graph_dir, graph_file)
+    # user_prompt = "독산동의 법인카드 매출을 시간대 별로 알려줘"
 
     # template 로드
     code_gen_input = ["context","report_file","graph_file","task"]
@@ -92,7 +83,9 @@ def response_from_llm(user_prompt, file_idx = 1):
     )
 
     # 모델 로드
-    code_gen_loader = OllamaModelLoader(model_id = "wizardcoder:34b-python", pt_task = "code-gen")
+    code_gen_loader = OllamaModelLoader(
+        model_id="wizardcoder:34b-python", pt_task="code-gen"
+    )
     code_gen_mdl = code_gen_loader.load_model()
 
     # qdrant 커넥션
@@ -113,7 +106,7 @@ def response_from_llm(user_prompt, file_idx = 1):
     valid_yn = True
 
     for data in result:
-        valid_filter = data[0].metadata['filter']
+        valid_filter = data[0].metadata["filter"]
         logger.info(valid_filter)
         print(valid_filter)
 
@@ -121,8 +114,7 @@ def response_from_llm(user_prompt, file_idx = 1):
             print(data[0].page_content)
             valid_yn = False
             break
-
-    if valid_yn is False:
+    if not valid_yn:
         return return_txt, graph_path, report_path
 
     prompt_query_doc = qdrant.qdrant_similarity_search(
@@ -143,21 +135,45 @@ def response_from_llm(user_prompt, file_idx = 1):
     )
 
     logger.info("프롬프트 번호: %s", prompt_no)
+    prompt_query_doc = qdrant.qdrant_similarity_search(
+        client=qd_client, task=user_prompt, collection_name="context", k=1
+    )
+    # logger.info(f"prompt_query:\n{prompt_query_doc}")
+    prompt_no = prompt_query_doc[0][0].metadata["filter"]
+    # logger.info(f"prompt_no:{prompt_no}")
+    data = qdrant.qdrant_similarity_search(
+        client=qd_client,
+        task=user_prompt,
+        collection_name="document",
+        filter=get_filter("filter", prompt_no),
+        k=1,
+    )
+    logger.info("프롬프트 번호: %s", prompt_no)
     context = data[0][0].page_content
 
     # 경로 받아오기
     partial_prompt = code_gen_temp.partial(
+        graph_file=graph_file, report_file=report_file, context=context
+    )
+    # qd_obj = qdrant.create_Qdrant_obj(client=qd_client, collection_name= 'format')
+    # retriever = qd_obj.as_retriever(filter = get_filter("filter","format"))
+    # setup_and_retrieval = RunnableParallel(
+    #     {"context": retriever| format_docs, "task": RunnablePassthrough()})
+
+    # chain = setup_and_retrieval | partial_prompt | code_gen_mdl | StrOutputParser()
                                         graph_file=graph_file,
                                         report_file=report_file,
                                         context = context
                                         )
     chain = partial_prompt | code_gen_mdl | StrOutputParser()
+    code_txt = chain.invoke({"task": user_prompt})
+    logger.info("코드 결과:\n %s", code_txt)
     code_txt = chain.invoke({"task":user_prompt})
     logger.info("코드 결과:\n%s", code_txt)
     prompt_result = partial_prompt.format(task=user_prompt)
     logger.info("프롬프트 결과:\n%s", prompt_result)
 
-    return_code = save_execute_python(code_txt,code_path)
+    return_code = save_execute_python(code_txt, code_path)
     if return_code == 0:
         return_txt = "모델이 성공적으로 결과를 생성하였습니다."
     elif return_code == 1:
@@ -168,3 +184,4 @@ def response_from_llm(user_prompt, file_idx = 1):
 
 if __name__ == "__main__":
     response_from_llm(user_prompt="독산동의 법인카드 매출을 시간대 별로 알려줘")
+# 독산동의 법인카드 매출을 시간대 별로 알려줘

@@ -1,17 +1,48 @@
+"""
+* Version: 1.0
+* 파일명: qdrant.py
+* 설명: QdrantClient를 통해 벡터 컬렉션 생성, 벡터스토어에 추가, 유사도 검색을 수행하는 기능
+* 수정일자: 2024/05/02
+* 수정자: 손예선
+* 수정 내용
+    1. 사용하지 않은 모듈 Import 제외
+    2. 환경에 따라 경로 설정
+    3. 테스트 코드 삭제
+    4. built-in 매개변수명 변경(filter -> filters)
+"""
+import os
 import json
+
+import tiktoken
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
 from qdrant_client import QdrantClient
 import qdrant_client
+import qdrant_client.http
 from qdrant_client.http import models
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Qdrant
-import tiktoken
 
-with open(
-    "/home/prompt_eng/langchain/langchain_proto/web_main/config/qdrant.json",
-    "r",
-    encoding="utf8",
-) as f:
+from langchain_community.vectorstores import Qdrant
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+
+
+# 운영 체제에 따라 경로 설정
+if os.name == 'posix':
+    PATH = os.path.join(
+        os.environ.get('HOME'),
+        'langchain_proto',
+        'web_main',
+    )
+elif os.name == 'nt':
+    PATH = os.path.join(
+       'c:', 
+       os.environ.get('HOMEPATH'),
+       "langchain_proto", 
+       "web_main",
+    )
+else:
+    PATH = None
+
+with open(os.path.join(PATH, 'config', 'qdrant.json'), encoding='utf-8') as f:
     config = json.load(f)
 
 QDRANT_HOST = config["QDRANT_HOST"]
@@ -19,24 +50,22 @@ QDRANT_API_KEY = config["QDRANT_API_KEY"]
 
 
 class VectorDB:
+    """QdrantClient로 벡터 데이터를 저장하고 관리"""
     def __init__(self):
         self.host = QDRANT_HOST
         self.api_key = QDRANT_API_KEY
         self.embeddings = HuggingFaceEmbeddings(
             model_name="jhgan/ko-sroberta-multitask",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
+            model_kwargs={'device': 'cpu'},
+            encode_kwargs={'normalize_embeddings': True}
         )
 
     def create_connection(self):
         """
-        QdrantClient와의 연결을 생성합니다.
-
+        QdrantClient와 연결 생성
+        
         Returns:
-            QdrantClient: 호스트와 API 키를 사용하여 생성된 QdrantClient의 인스턴스입니다.
-
-        Note:
-            이 함수는 QdrantClient와의 연결을 설정하는 데 사용됩니다. QdrantClient는 호스트와 API 키를 기반으로 데이터를 관리하고 처리합니다.
+            QdrantClient: QdrantClient 연결 객체
         """
         client = QdrantClient(self.host, api_key=self.api_key)
         return client
@@ -206,25 +235,27 @@ def format_docs(docs):
 
 def remove_overlaps_in_sequence(texts):
     """
-    Removes overlapping parts from a list of texts where each text overlaps with the next one.
-    Returns a single merged text with all overlaps removed.
+    주어진 텍스트 리스트에서 겹치는 부분을 제거한 후 합친 텍스트를 반환
+
+    Args:
+        texts (list): 겹치는 부분을 제거하고 합칠 텍스트 리스트
+    
+    Returns:
+        str: 겹치는 부분이 제거된 후 합쳐진 텍스트
     """
     if not texts:
         return ""
-    # Start with the first text
+
     merged_text = texts[0]
 
-    # Iterate through the texts, starting from the second one
     for next_text in texts[1:]:
-        # Finding the overlap
         min_length = min(len(merged_text), len(next_text))
         for i in range(min_length, 0, -1):
+            # merged_text와 next_text의 겹치는 부분을 제외하고 연결
             if merged_text.endswith(next_text[:i]):
-                # Overlap found, concatenate the unique part of the merged_text with the unique part of next_text
                 merged_text += next_text[i:]
                 break
         else:
-            # No overlap found, concatenate the whole next_text
             merged_text += next_text
 
     return merged_text

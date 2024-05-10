@@ -1,104 +1,62 @@
+"""
+* Version: 1.0
+* 파일명: save_file.py
+* 설명: 모델 결과 중 생성된 코드만 추출하여 지정된 위치에 저장
+* 수정일자: 2024/05/02
+* 수정자: 손예선
+* 수정 내용
+    1. 환경에 따라 경로 설정
+"""
+
 import subprocess
 import re
+import os
 
+if os.name == 'posix':
+    PATH = os.path.join(
+        os.environ.get('HOME'),
+        'langchain_proto',
+        'web_main',
+    )
+elif os.name == 'nt':
+    PATH = os.path.join(
+       'c:', 
+       os.environ.get('HOMEPATH'),
+       'langchain_proto', 
+       'web_main',
+    )
+else:
+    PATH = None
 
-def save_execute_python_test(code, path):
-    code = re.sub("python\n", "", code)
-    code = re.sub(r"```\n[\w\s]*", "", code).strip()
-    code = re.sub("```", "", code).strip()
-    code = re.sub(r"\[PYTHON\]", "", code)
-    code = re.sub(r"\[\/PYTHON\].*", "", code, flags=re.DOTALL)
-    # code = re.sub('\[/PYTHON\][\w|\s]*','',code)
-    # code = re.sub('data.csv','/home/prompt_eng/langchain/langchain_proto/web_main/data/csv/data.csv',code)
+def save_execute_python(code,path):
+    """
+    모델에서 생성된 코드 중 정규직으로 추출된 코드를 지정한 위치에 저장
+    Args:
+        code (str): 모델에서 생성된 코드
+        path (str): 저장할 파일의 경로
+
+    Returns:
+        int: 처리 결과에 대한 반환 코드, 성공=0
+    """
+    code = re.sub('python\n','',code)
+    code = re.sub(r'```\n[\w\s]*','',code).strip()
+    code = re.sub('```','',code).strip()
+    code = re.sub(r'\[PYTHON\]','',code)
+    code = re.sub(r'\[\/PYTHON\].*','', code, flags=re.DOTALL)
+    code = re.sub(r'\[/PYTHON\][\w|\s]*','',code)
+    code = re.sub(
+        'data.csv',
+        os.path.join(PATH, 'data', 'csv', 'data.csv'),
+        code
+        )
     code = re.sub(
         r"pd\.read_csv\(['\"](.+?)['\"]\)",
-        'pd.read_csv("/home/prompt_eng/langchain/langchain_proto/web_main/data/csv/data.csv")',
-        code,
-    )
-    with open(path, "w", encoding="utf-8") as file:
-        file.write(code)
-    subprocess.Popen(["python3", path])
+        "pd.read_csv(os.path.join(PATH, 'data', 'csv', 'data.csv'))",
+        code
+        )
 
-
-def save_execute_python(code, path):
-    code = re.sub("python\n", "", code)
-    code = re.sub(r"```\n[\w\s]*", "", code).strip()
-    code = re.sub("```", "", code).strip()
-    code = re.sub(r"\[PYTHON\]", "", code)
-    code = re.sub(r"\[\/PYTHON\].*", "", code, flags=re.DOTALL)
-    code = re.sub(r"\[/PYTHON\][\w|\s]*", "", code)
-    code = re.sub(
-        "data.csv",
-        "/home/prompt_eng/langchain/langchain_proto/web_main/data/csv/data.csv",
-        code,
-    )
-    code = re.sub(
-        r"pd\.read_csv\(['\"](.+?)['\"]\)",
-        'pd.read_csv("/home/prompt_eng/langchain/langchain_proto/web_main/data/csv/data.csv")',
-        code,
-    )
-    with open(path, "w", encoding="utf-8") as file:
+    with open(path, 'w', encoding='utf-8') as file:
         file.write(code)
-    process = subprocess.Popen(
-        ["python3", path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    # data = process.communicate()
+
+    process = subprocess.Popen(['python3', path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return process.returncode
-
-
-# if __name__ == "__main__":
-# 	code = """
-
-# import pandas as pd
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-
-
-# # 데이터프레임 로드
-# df = pd.read_csv("/home/prompt_eng/langchain/langchain_proto/web_main/data/csv/data.csv")
-
-
-# # 누락데이터 삭제
-# df = df.dropna(subset=['MER_ADNG_NM'])
-
-
-# # 컬럼 이름 변경
-# df.columns = ['SALE_DATE', 'TIME_CD', 'INDV_CP_DV_CD', 'MER_SIDO_NM', 'MER_CCG_NM', 'MER_ADNG_NM', 'MER_ADNG_NO', 'MAIN_BUZ_DESC', 'TP_GRP_NM', 'ALS_MER_TPBUZ_NM', 'CSTMR_SIDO_NM', 'CSTMR_CCG_NM', 'CSTMR_ADNG_NM', 'CSTMR_ADNG_NO', 'SE_CTGO_CD', 'AGE_10_CD', 'LIFE_GB_CD', 'INDV_INCM_AMT', 'MER_CNT', 'SALE_AMT', 'SALE_CNT']
-
-
-# # 법인 카드 필터링
-# df = df[df['INDV_CP_DV_CD'] == '법인']
-
-
-# # 인천에서 결제 비율 높은 지역구 추출
-# filtered_df = df[df['MER_SIDO_NM'] == '인천광역시']
-
-
-# # 지역구별 결제 비율 계산
-# payment_rate = filtered_df.groupby(['MER_CCG_NM'])['SALE_AMT'].sum() / filtered_df.groupby(['MER_CCG_NM'])['SALE_CNT'].sum()
-
-
-# # 결제 비율이 높은 지역구 추출
-# highest_payment_rate_region = payment_rate.idxmax()
-
-
-# # 결제 비율이 높은 지역구 데이터 추출
-# highest_payment_rate_data = filtered_df[filtered_df['MER_CCG_NM'] == highest_payment_rate_region]
-
-
-# # 그래프 생성
-# plt.figure(figsize=(15, 5))
-# sns.barplot(x=highest_payment_rate_data['MER_ADNG_NM'], y=highest_payment_rate_data['SALE_AMT'])
-# plt.title(f'{highest_payment_rate_region}의 결제 비율')
-# plt.xlabel('지역')
-# plt.ylabel('결제액')
-# plt.savefig('/home/prompt_eng/langchain/langchain_proto/web_main/data/result/graph/1_graph.png')
-# plt.close()
-
-# # 분석 결과 저장
-# with open('/home/prompt_eng/langchain/langchain_proto/web_main/data/result/text/1_text.txt', 'w') as f:
-#     f.write(f"{highest_payment_rate_region}의 결제 비율이 {payment_rate[highest_payment_rate_region]:.2f}이며, 가장 많은 결제액을 기록한 지역은 {highest_payment_rate_data['MER_ADNG_NM'].iloc[0]}입니다.")
-# """
-# 	path = "/home/prompt_eng/langchain/langchain_proto/web_main/data/result/1_code.py"
-# 	a = save_execute_python_test(code,path)
